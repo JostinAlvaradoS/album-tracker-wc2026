@@ -1,0 +1,37 @@
+{
+  "name": "panini-wc2026",
+  "version": "1.0.0",
+  "description": "Gestor de cromos del album Panini FIFA World Cup 2026",
+  "scripts": {
+    "ng": "ng",
+    "set-env": "node scripts/set-env.js",
+    "prestart": "npm run set-env",
+    "start": "ng serve",
+    "prebuild": "NODE_ENV=production npm run set-env",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "^18.2.0",
+    "@angular/common": "^18.2.0",
+    "@angular/compiler": "^18.2.0",
+    "@angular/core": "^18.2.0",
+    "@angular/fire": "^18.0.1",
+    "@angular/forms": "^18.2.0",
+    "@angular/platform-browser": "^18.2.0",
+    "@angular/platform-browser-dynamic": "^18.2.0",
+    "@angular/router": "^18.2.0",
+    "firebase": "^10.13.0",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.14.10"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^18.2.0",
+    "@angular/cli": "^18.2.0",
+    "@angular/compiler-cli": "^18.2.0",
+    "dotenv": "^16.4.5",
+    "typescript": "~5.5.2"
+  }
+}

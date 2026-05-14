@@ -1,0 +1,12 @@
+{
+  "name": "panini-wc2026-scripts",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "generate": "node generate-catalog.js",
+    "import": "node import-to-firestore.js"
+  },
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  }
+}

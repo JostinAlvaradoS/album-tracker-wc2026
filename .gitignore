@@ -1,0 +1,38 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-error.log*
+
+# Env (NUNCA versionar valores reales)
+.env
+.env.local
+.env.*.local
+angular/.env
+angular/.env.local
+scripts/.env
+
+# Angular build / cache
+angular/dist/
+angular/.angular/
+angular/tmp/
+
+# Environment generado desde .env (no versionar, se regenera)
+angular/src/environments/environment.ts
+
+# Firebase Admin SDK (credenciales privadas)
+scripts/serviceAccountKey.json
+scripts/catalog.json
+
+# Firebase CLI
+.firebase/
+firebase-debug.log
+firebase-debug.*.log
+
+# Editores
+.vscode/
+.idea/
+*.swp

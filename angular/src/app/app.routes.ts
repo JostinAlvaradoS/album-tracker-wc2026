@@ -1,0 +1,38 @@
+import { Routes } from '@angular/router';
+import { authGuard } from './core/guards/auth.guard';
+
+export const routes: Routes = [
+  { path: '', redirectTo: 'album', pathMatch: 'full' },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./features/login/login.component').then(
+        (m) => m.LoginComponent
+      ),
+  },
+  {
+    path: 'album',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/album-view/album-view.component').then(
+        (m) => m.AlbumViewComponent
+      ),
+  },
+  {
+    path: 'faltas',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/missing-list/missing-list.component').then(
+        (m) => m.MissingListComponent
+      ),
+  },
+  {
+    path: 'repes',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/duplicates/duplicates.component').then(
+        (m) => m.DuplicatesComponent
+      ),
+  },
+  { path: '**', redirectTo: 'album' },
+];
