@@ -68,3 +68,36 @@ export interface SectionView extends Section {
   stickers: StickerView[];
   ownedCount: number;
 }
+
+// ----- Estadísticas derivadas (para la pantalla de progreso) -----
+
+/** Progreso de una sección concreta (una selección o sección especial). */
+export interface SectionProgress {
+  id: string;
+  name: string;
+  type: SectionType;
+  owned: number;
+  total: number;
+  duplicates: number;
+  /** 0–100 */
+  percent: number;
+  complete: boolean;
+}
+
+/** Resumen global de la colección. */
+export interface AlbumProgress {
+  owned: number;
+  missing: number;
+  total: number;
+  /** 0–100 */
+  percent: number;
+  /** Total de cromos repetidos (suma de count-1). */
+  duplicates: number;
+  /** Cromos físicos pegados + repes = lo que el usuario tiene en mano. */
+  totalStickersOwned: number;
+  /** Secciones (selecciones) ya completadas. */
+  sectionsComplete: number;
+  sectionsTotal: number;
+  /** Desglose por sección, ordenado. */
+  sections: SectionProgress[];
+}

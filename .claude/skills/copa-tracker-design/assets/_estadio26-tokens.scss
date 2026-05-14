@@ -1,0 +1,259 @@
+// =============================================================
+//  COPA TRACKER — Tokens del sistema de diseño "Línea 26"
+//  Identidad ORIGINAL para tracker de álbum del mundial.
+//  Dirección: moderna y limpia, color como acento puntual.
+//  No contiene marca oficial de FIFA.
+//
+//  Uso: importar una sola vez en los estilos globales del proyecto
+//  (p. ej. styles.scss):  @use 'estadio26-tokens' as *;
+//  o copiar el bloque :root a styles.scss si se usa CSS plano.
+// =============================================================
+
+// -------------------------------------------------------------
+//  1. PALETA CRUDA  (no usar directamente en componentes —
+//     usar los tokens semánticos del bloque :root de abajo)
+// -------------------------------------------------------------
+// Neutros — la base del diseño limpio. Superficies y texto.
+$raw-ink-950:    #0d1117; // texto principal modo claro / fondo modo oscuro
+$raw-ink-800:    #1f2733;
+$raw-ink-600:    #475061; // texto secundario
+$raw-ink-400:    #8b94a3; // texto terciario / muted
+$raw-ink-200:    #d6dae1; // bordes
+$raw-ink-100:    #e9ecf1; // superficie sutil
+$raw-ink-50:     #f4f6f9; // fondo de la app (modo claro)
+$raw-white:      #ffffff;
+
+// Neutros oscuros (para modo oscuro)
+$raw-slate-950:  #0e1116;
+$raw-slate-900:  #161b22;
+$raw-slate-800:  #20262f;
+$raw-slate-700:  #2d3540;
+
+// Acentos — usados con moderación, nunca como relleno dominante.
+$raw-green-600:  #11a14a; // verde "obtenida" — el acento principal
+$raw-green-500:  #1cc25c;
+$raw-green-100:  #d9f6e3; // fondo tenue verde
+
+$raw-amber-600:  #d98700; // ámbar "repe" — acento secundario
+$raw-amber-500:  #f5a623;
+$raw-amber-100:  #fdeecb;
+
+$raw-blue-600:   #2563eb; // azul — datos, enlaces, foco
+$raw-blue-500:   #3b82f6;
+$raw-blue-100:   #dbe7fe;
+
+$raw-red-600:    #dc2626; // error
+
+// -------------------------------------------------------------
+//  2. TOKENS SEMÁNTICOS  →  CSS custom properties
+//     Modo CLARO por defecto (diseño moderno y limpio).
+// -------------------------------------------------------------
+:root {
+  // --- superficies ---
+  --e26-bg:            #{$raw-ink-50};   // fondo de la app
+  --e26-surface:       #{$raw-white};    // tarjetas
+  --e26-surface-2:     #{$raw-ink-100};  // inputs, tarjetas anidadas
+  --e26-surface-3:     #{$raw-ink-200};  // hover / estados activos
+  --e26-overlay:       rgba(13, 17, 23, .45); // backdrop de modales
+
+  // --- texto ---
+  --e26-text:          #{$raw-ink-950};
+  --e26-text-muted:    #{$raw-ink-600};
+  --e26-text-subtle:   #{$raw-ink-400};  // terciario — etiquetas, hints
+  --e26-text-inverse:  #{$raw-white};
+
+  // --- bordes / líneas ---
+  --e26-border:        #{$raw-ink-200};
+  --e26-border-strong: #{$raw-ink-400};
+
+  // --- acentos (uso puntual, no de relleno) ---
+  --e26-primary:       #{$raw-green-600}; // acción principal, "obtenida"
+  --e26-primary-press: #{$raw-green-500};
+  --e26-primary-soft:  #{$raw-green-100}; // fondo tenue (chips, badges)
+  --e26-primary-on:    #{$raw-white};     // texto sobre primary
+
+  --e26-accent:        #{$raw-amber-600}; // "repe / para cambio"
+  --e26-accent-soft:   #{$raw-amber-100};
+  --e26-accent-on:     #{$raw-white};
+
+  --e26-info:          #{$raw-blue-600};  // datos, stats, enlaces, foco
+  --e26-info-soft:     #{$raw-blue-100};
+  --e26-info-on:       #{$raw-white};
+
+  // --- estados semánticos ---
+  --e26-success:       #{$raw-green-600};
+  --e26-warning:       #{$raw-amber-600};
+  --e26-danger:        #{$raw-red-600};
+
+  // --- estados de figurita (clave del producto) ---
+  --e26-sticker-owned:   var(--e26-primary);     // la tienes
+  --e26-sticker-missing: var(--e26-surface-2);   // te falta
+  --e26-sticker-dupe:    var(--e26-accent);      // repe / para cambio
+
+  // --- tipografía ---
+  // Fuentes libres (Google Fonts). Cargar en index.html — ver fundamentos.md
+  --e26-font-display: 'Clash Grotesk', 'Archivo', system-ui, sans-serif; // titulares, números
+  --e26-font-body:    'Inter', system-ui, sans-serif;                    // texto, UI
+  --e26-font-mono:    'JetBrains Mono', ui-monospace, monospace;          // códigos de figurita
+
+  --e26-fs-3xl: 2.25rem;  // 36px — número grande del marcador
+  --e26-fs-2xl: 1.75rem;  // 28px — título de pantalla
+  --e26-fs-xl:  1.3125rem;// 21px — título de sección
+  --e26-fs-lg:  1.0625rem;// 17px — subtítulo
+  --e26-fs-md:  0.9375rem;// 15px — cuerpo base
+  --e26-fs-sm:  0.8125rem;// 13px — secundario
+  --e26-fs-xs:  0.6875rem;// 11px — etiquetas, código de figurita
+
+  --e26-lh-tight: 1.1;
+  --e26-lh-snug:  1.3;
+  --e26-lh-base:  1.55;
+
+  --e26-tracking-display: -0.02em; // titulares modernos = tracking ajustado
+  --e26-tracking-caps:    0.06em;  // texto en mayúsculas / etiquetas
+
+  // --- espaciado (escala de 4) ---
+  --e26-space-1:  0.25rem;
+  --e26-space-2:  0.5rem;
+  --e26-space-3:  0.75rem;
+  --e26-space-4:  1rem;
+  --e26-space-5:  1.5rem;
+  --e26-space-6:  2rem;
+  --e26-space-7:  3rem;
+  --e26-space-8:  4rem;
+
+  // --- radios ---
+  --e26-radius-sm:   8px;
+  --e26-radius-md:   12px;
+  --e26-radius-lg:   16px;
+  --e26-radius-xl:   22px;
+  --e26-radius-pill: 999px;
+
+  // --- sombras (suaves, neutras — diseño limpio) ---
+  --e26-shadow-sm: 0 1px 2px rgba(13, 17, 23, .06);
+  --e26-shadow-md: 0 2px 8px rgba(13, 17, 23, .08), 0 1px 2px rgba(13, 17, 23, .04);
+  --e26-shadow-lg: 0 8px 28px rgba(13, 17, 23, .12), 0 2px 6px rgba(13, 17, 23, .06);
+  // anillo de acento sutil — para destacar logros sin saturar
+  --e26-ring-primary: 0 0 0 1px var(--e26-primary);
+  --e26-ring-info:    0 0 0 1px var(--e26-info);
+
+  // --- movimiento ---
+  --e26-dur-fast:   120ms;
+  --e26-dur-base:   200ms;
+  --e26-dur-slow:   320ms;
+  --e26-dur-reveal: 460ms; // revelado de figurita (sobrio)
+  --e26-ease-out:   cubic-bezier(.22, 1, .36, 1);     // entradas
+  --e26-ease-in:    cubic-bezier(.55, 0, 1, .45);     // salidas
+  --e26-ease-spring:cubic-bezier(.34, 1.4, .64, 1);   // rebote contenido
+
+  // --- capas (z-index) ---
+  --e26-z-base:     0;
+  --e26-z-sticky:   100;  // app-bar
+  --e26-z-nav:      200;  // bottom-nav
+  --e26-z-overlay:  900;  // backdrop
+  --e26-z-modal:    1000;
+  --e26-z-toast:    1100;
+
+  // --- áreas seguras (notch / gesture bar) ---
+  --e26-safe-top:    env(safe-area-inset-top, 0px);
+  --e26-safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+// -------------------------------------------------------------
+//  3. MODO OSCURO  (opcional — la app por defecto es clara).
+//     Activar con <html data-theme="dark"> o clase .e26-dark.
+//     Sigue siendo limpio: neutros oscuros, acentos algo más claros.
+// -------------------------------------------------------------
+:root[data-theme='dark'],
+.e26-dark {
+  --e26-bg:            #{$raw-slate-950};
+  --e26-surface:       #{$raw-slate-900};
+  --e26-surface-2:     #{$raw-slate-800};
+  --e26-surface-3:     #{$raw-slate-700};
+  --e26-overlay:       rgba(0, 0, 0, .60);
+
+  --e26-text:          #{$raw-ink-50};
+  --e26-text-muted:    #{$raw-ink-200};
+  --e26-text-subtle:   #{$raw-ink-400};
+  --e26-text-inverse:  #{$raw-slate-950};
+
+  --e26-border:        rgba(255, 255, 255, .10);
+  --e26-border-strong: rgba(255, 255, 255, .22);
+
+  --e26-primary:       #{$raw-green-500};
+  --e26-primary-soft:  rgba(28, 194, 92, .14);
+  --e26-accent:        #{$raw-amber-500};
+  --e26-accent-soft:   rgba(245, 166, 35, .16);
+  --e26-info:          #{$raw-blue-500};
+  --e26-info-soft:     rgba(59, 130, 246, .16);
+
+  --e26-shadow-sm: 0 1px 2px rgba(0, 0, 0, .40);
+  --e26-shadow-md: 0 2px 8px rgba(0, 0, 0, .45);
+  --e26-shadow-lg: 0 8px 28px rgba(0, 0, 0, .55);
+}
+
+// -------------------------------------------------------------
+//  4. RESET MÍNIMO + BASE  (opcional pero recomendado)
+// -------------------------------------------------------------
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--e26-bg);
+  color: var(--e26-text);
+  font-family: var(--e26-font-body);
+  font-size: var(--e26-fs-md);
+  line-height: var(--e26-lh-base);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+// titulares con la display font — modernos, tracking ajustado
+.e26-display {
+  font-family: var(--e26-font-display);
+  letter-spacing: var(--e26-tracking-display);
+  line-height: var(--e26-lh-tight);
+  font-weight: 600;
+}
+
+// código de figurita (ej. "ARG-07")
+.e26-code {
+  font-family: var(--e26-font-mono);
+  letter-spacing: var(--e26-tracking-caps);
+}
+
+// etiqueta en mayúsculas — para títulos de sección discretos
+.e26-eyebrow {
+  font-size: var(--e26-fs-xs);
+  letter-spacing: var(--e26-tracking-caps);
+  text-transform: uppercase;
+  color: var(--e26-text-subtle);
+  font-weight: 600;
+}
+
+// -------------------------------------------------------------
+//  5. MIXINS ÚTILES
+// -------------------------------------------------------------
+// breakpoints mobile-first
+@mixin e26-bp($name) {
+  @if $name == sm      { @media (min-width: 480px)  { @content; } }
+  @else if $name == md { @media (min-width: 768px)  { @content; } }
+  @else if $name == lg { @media (min-width: 1024px) { @content; } }
+  @else if $name == xl { @media (min-width: 1280px) { @content; } }
+}
+
+// foco visible accesible y coherente
+@mixin e26-focus-ring {
+  outline: none;
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--e26-bg), 0 0 0 4px var(--e26-info);
+  }
+}
+
+// truncar a N líneas
+@mixin e26-clamp($lines: 1) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

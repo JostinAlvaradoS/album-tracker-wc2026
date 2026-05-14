@@ -14,6 +14,7 @@ import { AuthService } from './core/services/auth.service';
         <a routerLink="/album" routerLinkActive="active">Álbum</a>
         <a routerLink="/faltas" routerLinkActive="active">Faltas</a>
         <a routerLink="/repes" routerLinkActive="active">Repes</a>
+        <a routerLink="/stats" routerLinkActive="active">Progreso</a>
         <span class="spacer"></span>
         <span class="who">
           {{ u.isAnonymous ? 'Invitado' : u.displayName || u.email }}

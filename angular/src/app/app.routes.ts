@@ -34,5 +34,13 @@ export const routes: Routes = [
         (m) => m.DuplicatesComponent
       ),
   },
+  {
+    path: 'stats',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/stats/stats.component').then(
+        (m) => m.StatsComponent
+      ),
+  },
   { path: '**', redirectTo: 'album' },
 ];

@@ -3,7 +3,9 @@ import { combineLatest, map, Observable } from 'rxjs';
 import { AlbumCatalogService } from './album-catalog.service';
 import { CollectionService } from './collection.service';
 import {
+  AlbumProgress,
   CollectionItem,
+  SectionProgress,
   SectionView,
   StickerStatus,
   StickerView,
@@ -81,6 +83,58 @@ export class AlbumViewService {
           .flatMap((s) => s.stickers)
           .filter((s) => s.status === 'duplicate')
       )
+    );
+  }
+
+  /**
+   * Estadísticas derivadas: progreso global y desglose por sección.
+   * Se calcula a partir de la vista combinada, así siempre está
+   * sincronizado con lo que el usuario marca en el álbum.
+   */
+  getProgress(albumId: string): Observable<AlbumProgress> {
+    return this.getAlbumView(albumId).pipe(
+      map((sections) => {
+        const sectionProgress: SectionProgress[] = sections.map((sec) => {
+          const total = sec.stickers.length;
+          const owned = sec.ownedCount;
+          const duplicates = sec.stickers.reduce(
+            (sum, s) => sum + Math.max(0, s.count - 1),
+            0
+          );
+          return {
+            id: sec.id,
+            name: sec.name,
+            type: sec.type,
+            owned,
+            total,
+            duplicates,
+            percent: total ? Math.round((owned / total) * 100) : 0,
+            complete: total > 0 && owned === total,
+          };
+        });
+
+        const owned = sectionProgress.reduce((s, p) => s + p.owned, 0);
+        const total = sectionProgress.reduce((s, p) => s + p.total, 0);
+        const duplicates = sectionProgress.reduce(
+          (s, p) => s + p.duplicates,
+          0
+        );
+
+        return {
+          owned,
+          missing: total - owned,
+          total,
+          percent: total ? Math.round((owned / total) * 100) : 0,
+          duplicates,
+          totalStickersOwned: owned + duplicates,
+          sectionsComplete: sectionProgress.filter((p) => p.complete).length,
+          sectionsTotal: sectionProgress.length,
+          // ordenado de más completo a menos, para la lista
+          sections: [...sectionProgress].sort(
+            (a, b) => b.percent - a.percent
+          ),
+        };
+      })
     );
   }
 }
