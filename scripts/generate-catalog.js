@@ -3,8 +3,8 @@
  * -----------------------------------------------------------
  * Produce catalog.json listo para importar a Firestore.
  *
- * El layout de cada selección es CONFIGURABLE: ajusta TEAM_LAYOUT
- * según tu edición del álbum sin tocar el resto del código.
+ * El orden de selecciones y el contenido FWC siguen la Planilla de
+ * Control oficial del álbum (ideasparaimprimir.com).
  *
  * Uso:  node generate-catalog.js
  */
@@ -12,121 +12,115 @@
 const fs = require('fs');
 const path = require('path');
 
-// ============================================================
-// 1. CONFIGURACIÓN — AJUSTA ESTO A TU EDICIÓN
-// ============================================================
-
-// slotsPerTeam: cuántos cromos tiene cada selección
-// emblemSlot:   número de slot que es el escudo
-// teamPhotoSlot: número de slot que es la foto del equipo
-// el resto se rellenan como "Jugador N"
 const TEAM_LAYOUT = {
-  slotsPerTeam: 21,     // <-- cámbialo si son 20, 19, etc.
-  emblemSlot: 1,        // MEX1 = escudo
-  teamPhotoSlot: 13,    // MEX13 = foto del equipo
+  slotsPerTeam: 20,    // El álbum WC2026 trae 20 cromos por selección
+  emblemSlot: 1,       // MEX1 = escudo (foil)
+  teamPhotoSlot: 2,    // MEX2 = foto del equipo (horizontal)
 };
 
-// Las 48 selecciones. El "code" es el prefijo del cromo (MEX1, ARG1...).
-// Ajusta nombres/orden a tu álbum. group es informativo.
+// 48 selecciones en el orden EXACTO de la planilla de control
 const TEAMS = [
-  { id: 'mex', code: 'MEX', name: 'México',            group: 'A' },
-  { id: 'can', code: 'CAN', name: 'Canadá',            group: 'B' },
-  { id: 'usa', code: 'USA', name: 'Estados Unidos',    group: 'D' },
-  { id: 'arg', code: 'ARG', name: 'Argentina',         group: '?' },
-  { id: 'bra', code: 'BRA', name: 'Brasil',            group: '?' },
-  { id: 'ecu', code: 'ECU', name: 'Ecuador',           group: '?' },
-  { id: 'uru', code: 'URU', name: 'Uruguay',           group: '?' },
-  { id: 'col', code: 'COL', name: 'Colombia',          group: '?' },
-  { id: 'par', code: 'PAR', name: 'Paraguay',          group: '?' },
-  { id: 'esp', code: 'ESP', name: 'España',            group: '?' },
-  { id: 'fra', code: 'FRA', name: 'Francia',           group: '?' },
-  { id: 'eng', code: 'ENG', name: 'Inglaterra',        group: '?' },
-  { id: 'ger', code: 'GER', name: 'Alemania',          group: '?' },
-  { id: 'por', code: 'POR', name: 'Portugal',          group: '?' },
-  { id: 'ned', code: 'NED', name: 'Países Bajos',      group: '?' },
-  { id: 'bel', code: 'BEL', name: 'Bélgica',           group: '?' },
-  { id: 'cro', code: 'CRO', name: 'Croacia',           group: '?' },
-  { id: 'ita', code: 'ITA', name: 'Italia',            group: '?' },
-  { id: 'sui', code: 'SUI', name: 'Suiza',             group: '?' },
-  { id: 'aut', code: 'AUT', name: 'Austria',           group: '?' },
-  { id: 'sco', code: 'SCO', name: 'Escocia',           group: '?' },
-  { id: 'nor', code: 'NOR', name: 'Noruega',           group: '?' },
-  { id: 'tur', code: 'TUR', name: 'Turquía',           group: '?' },
-  { id: 'ukr', code: 'UKR', name: 'Ucrania',           group: '?' },
-  { id: 'jpn', code: 'JPN', name: 'Japón',             group: '?' },
-  { id: 'kor', code: 'KOR', name: 'Corea del Sur',     group: '?' },
-  { id: 'irn', code: 'IRN', name: 'Irán',              group: '?' },
-  { id: 'ksa', code: 'KSA', name: 'Arabia Saudí',      group: '?' },
-  { id: 'aus', code: 'AUS', name: 'Australia',         group: '?' },
-  { id: 'qat', code: 'QAT', name: 'Catar',             group: '?' },
-  { id: 'uzb', code: 'UZB', name: 'Uzbekistán',        group: '?' },
-  { id: 'jor', code: 'JOR', name: 'Jordania',          group: '?' },
-  { id: 'mar', code: 'MAR', name: 'Marruecos',         group: '?' },
-  { id: 'sen', code: 'SEN', name: 'Senegal',           group: '?' },
-  { id: 'tun', code: 'TUN', name: 'Túnez',             group: '?' },
-  { id: 'egy', code: 'EGY', name: 'Egipto',            group: '?' },
-  { id: 'alg', code: 'ALG', name: 'Argelia',           group: '?' },
-  { id: 'gha', code: 'GHA', name: 'Ghana',             group: '?' },
-  { id: 'civ', code: 'CIV', name: 'Costa de Marfil',   group: '?' },
-  { id: 'cmr', code: 'CMR', name: 'Camerún',           group: '?' },
-  { id: 'rsa', code: 'RSA', name: 'Sudáfrica',         group: '?' },
-  { id: 'cpv', code: 'CPV', name: 'Cabo Verde',        group: '?' },
-  { id: 'nzl', code: 'NZL', name: 'Nueva Zelanda',     group: '?' },
-  { id: 'crc', code: 'CRC', name: 'Costa Rica',        group: '?' },
-  { id: 'pan', code: 'PAN', name: 'Panamá',            group: '?' },
-  { id: 'hai', code: 'HAI', name: 'Haití',             group: '?' },
-  { id: 'cuw', code: 'CUW', name: 'Curazao',           group: '?' },
-  { id: 'hon', code: 'HON', name: 'Honduras',          group: '?' },
+  { id: 'mex', code: 'MEX', name: 'México' },
+  { id: 'rsa', code: 'RSA', name: 'Sudáfrica' },
+  { id: 'kor', code: 'KOR', name: 'Corea del Sur' },
+  { id: 'cze', code: 'CZE', name: 'Chequia' },
+  { id: 'can', code: 'CAN', name: 'Canadá' },
+  { id: 'bih', code: 'BIH', name: 'Bosnia y Herzegovina' },
+  { id: 'qat', code: 'QAT', name: 'Catar' },
+  { id: 'sui', code: 'SUI', name: 'Suiza' },
+  { id: 'bra', code: 'BRA', name: 'Brasil' },
+  { id: 'mar', code: 'MAR', name: 'Marruecos' },
+  { id: 'hai', code: 'HAI', name: 'Haití' },
+  { id: 'sco', code: 'SCO', name: 'Escocia' },
+  { id: 'usa', code: 'USA', name: 'Estados Unidos' },
+  { id: 'par', code: 'PAR', name: 'Paraguay' },
+  { id: 'aus', code: 'AUS', name: 'Australia' },
+  { id: 'tur', code: 'TUR', name: 'Turquía' },
+  { id: 'ger', code: 'GER', name: 'Alemania' },
+  { id: 'cuw', code: 'CUW', name: 'Curazao' },
+  { id: 'civ', code: 'CIV', name: 'Costa de Marfil' },
+  { id: 'ecu', code: 'ECU', name: 'Ecuador' },
+  { id: 'ned', code: 'NED', name: 'Países Bajos' },
+  { id: 'jpn', code: 'JPN', name: 'Japón' },
+  { id: 'swe', code: 'SWE', name: 'Suecia' },
+  { id: 'tun', code: 'TUN', name: 'Túnez' },
+  { id: 'bel', code: 'BEL', name: 'Bélgica' },
+  { id: 'egy', code: 'EGY', name: 'Egipto' },
+  { id: 'irn', code: 'IRN', name: 'Irán' },
+  { id: 'nzl', code: 'NZL', name: 'Nueva Zelanda' },
+  { id: 'esp', code: 'ESP', name: 'España' },
+  { id: 'cpv', code: 'CPV', name: 'Cabo Verde' },
+  { id: 'ksa', code: 'KSA', name: 'Arabia Saudí' },
+  { id: 'uru', code: 'URU', name: 'Uruguay' },
+  { id: 'fra', code: 'FRA', name: 'Francia' },
+  { id: 'sen', code: 'SEN', name: 'Senegal' },
+  { id: 'irq', code: 'IRQ', name: 'Irak' },
+  { id: 'nor', code: 'NOR', name: 'Noruega' },
+  { id: 'arg', code: 'ARG', name: 'Argentina' },
+  { id: 'alg', code: 'ALG', name: 'Argelia' },
+  { id: 'aut', code: 'AUT', name: 'Austria' },
+  { id: 'jor', code: 'JOR', name: 'Jordania' },
+  { id: 'por', code: 'POR', name: 'Portugal' },
+  { id: 'cod', code: 'COD', name: 'R. D. del Congo' },
+  { id: 'uzb', code: 'UZB', name: 'Uzbekistán' },
+  { id: 'col', code: 'COL', name: 'Colombia' },
+  { id: 'eng', code: 'ENG', name: 'Inglaterra' },
+  { id: 'cro', code: 'CRO', name: 'Croacia' },
+  { id: 'gha', code: 'GHA', name: 'Ghana' },
+  { id: 'pan', code: 'PAN', name: 'Panamá' },
 ];
 
-// Secciones especiales con cromos definidos explícitamente.
-// Cada cromo: { code, label, foil? }
-// Edita los label de FWC9..FWC19 cuando tengas el detalle.
+// Secciones especiales en el orden de la planilla:
+//   1) FWC1-8 al INICIO (placement: 'before')
+//   2) 48 equipos
+//   3) FWC9-19 al FINAL (placement: 'after')
+//   4) Coca-Cola CC1-14 (placement: 'after')
 const SPECIAL_SECTIONS = [
   {
-    id: 'intro',
-    type: 'intro',
-    name: 'Introducción',
+    id: 'fwc_intro',
+    type: 'special',
+    name: 'FIFA World Cup 2026',
+    placement: 'before',
     stickers: [
-      { code: '00', label: 'Logo Panini', foil: false },
+      { code: 'FWC1', label: 'Official Emblem',         foil: true,  kind: 'special' },
+      { code: 'FWC2', label: 'Official Emblem',         foil: true,  kind: 'special' },
+      { code: 'FWC3', label: 'Official Mascots',        foil: false, kind: 'special' },
+      { code: 'FWC4', label: 'Official Slogan',         foil: false, kind: 'special' },
+      { code: 'FWC5', label: 'Official Ball',           foil: false, kind: 'special' },
+      { code: 'FWC6', label: 'Trophy',                  foil: true,  kind: 'special' },
+      { code: 'FWC7', label: 'Host Country Emblem',     foil: false, kind: 'special' },
+      { code: 'FWC8', label: 'Host Country Emblem',     foil: false, kind: 'special' },
     ],
   },
   {
-    id: 'fwc',
+    id: 'fwc_champions',
     type: 'special',
-    name: 'FIFA World Cup 2026',
+    name: 'Selecciones campeonas',
+    placement: 'after',
     stickers: [
-      { code: 'FWC1',  label: 'Official Emblem',          foil: false },
-      { code: 'FWC2',  label: 'Official Emblem',          foil: false },
-      { code: 'FWC3',  label: 'Official Mascots',         foil: false },
-      { code: 'FWC4',  label: 'Official Slogan',          foil: false },
-      { code: 'FWC5',  label: 'Official Ball',            foil: false },
-      { code: 'FWC6',  label: 'Trophy',                   foil: false },
-      { code: 'FWC7',  label: 'Host Country Emblem',      foil: false },
-      { code: 'FWC8',  label: 'Host Country Emblem',      foil: false },
-      // FWC9-FWC19: selecciones campeonas. Ajusta el país de cada
-      // slot según tu álbum (el orden exacto puede variar).
-      { code: 'FWC9',  label: 'Selección campeona 1',     foil: false },
-      { code: 'FWC10', label: 'Selección campeona 2',     foil: false },
-      { code: 'FWC11', label: 'Selección campeona 3',     foil: false },
-      { code: 'FWC12', label: 'Selección campeona 4',     foil: false },
-      { code: 'FWC13', label: 'Selección campeona 5',     foil: false },
-      { code: 'FWC14', label: 'Selección campeona 6',     foil: false },
-      { code: 'FWC15', label: 'Selección campeona 7',     foil: false },
-      { code: 'FWC16', label: 'Selección campeona 8',     foil: false },
-      { code: 'FWC17', label: 'Selección campeona 9',     foil: false },
-      { code: 'FWC18', label: 'Selección campeona 10',    foil: false },
-      { code: 'FWC19', label: 'Selección campeona 11',    foil: false },
+      { code: 'FWC9',  label: 'Campeón 1',  foil: false, kind: 'emblem' },
+      { code: 'FWC10', label: 'Campeón 2',  foil: false, kind: 'emblem' },
+      { code: 'FWC11', label: 'Campeón 3',  foil: false, kind: 'emblem' },
+      { code: 'FWC12', label: 'Campeón 4',  foil: false, kind: 'emblem' },
+      { code: 'FWC13', label: 'Campeón 5',  foil: false, kind: 'emblem' },
+      { code: 'FWC14', label: 'Campeón 6',  foil: false, kind: 'emblem' },
+      { code: 'FWC15', label: 'Campeón 7',  foil: false, kind: 'emblem' },
+      { code: 'FWC16', label: 'Campeón 8',  foil: false, kind: 'emblem' },
+      { code: 'FWC17', label: 'Campeón 9',  foil: false, kind: 'emblem' },
+      { code: 'FWC18', label: 'Campeón 10', foil: false, kind: 'emblem' },
+      { code: 'FWC19', label: 'Campeón 11', foil: false, kind: 'emblem' },
     ],
   },
   {
     id: 'cocacola',
     type: 'special',
     name: 'Coca-Cola',
+    placement: 'after',
     stickers: Array.from({ length: 14 }, (_, i) => ({
       code: `CC${i + 1}`,
       label: `Coca-Cola ${i + 1}`,
       foil: false,
+      kind: 'special',
     })),
   },
 ];
@@ -138,14 +132,10 @@ const ALBUM = {
   publisher: 'Panini',
 };
 
-// ============================================================
-// 2. GENERACIÓN — normalmente no necesitas tocar nada de aquí
-// ============================================================
-
-function labelForSlot(slotNumber) {
-  if (slotNumber === TEAM_LAYOUT.emblemSlot) return { label: 'Escudo', kind: 'emblem' };
-  if (slotNumber === TEAM_LAYOUT.teamPhotoSlot) return { label: 'Foto del equipo', kind: 'teamPhoto' };
-  return { label: null, kind: 'player' }; // label de jugador se pone luego
+function labelForSlot(n) {
+  if (n === TEAM_LAYOUT.emblemSlot)    return { label: 'Escudo',          kind: 'emblem' };
+  if (n === TEAM_LAYOUT.teamPhotoSlot) return { label: 'Foto del equipo', kind: 'teamPhoto' };
+  return { label: null, kind: 'player' };
 }
 
 function build() {
@@ -153,44 +143,16 @@ function build() {
   const stickers = [];
   let order = 0;
 
-  // --- Secciones de equipos ---
-  TEAMS.forEach((team, teamIndex) => {
-    sections.push({
-      id: team.id,
-      type: 'team',
-      name: team.name,
-      code: team.code,
-      group: team.group,
-      slotCount: TEAM_LAYOUT.slotsPerTeam,
-      order: teamIndex + 1,
-    });
+  const before = SPECIAL_SECTIONS.filter((s) => s.placement === 'before');
+  const after  = SPECIAL_SECTIONS.filter((s) => s.placement === 'after');
 
-    let playerCounter = 0;
-    for (let n = 1; n <= TEAM_LAYOUT.slotsPerTeam; n++) {
-      const { label, kind } = labelForSlot(n);
-      if (kind === 'player') playerCounter++;
-      stickers.push({
-        code: `${team.code}${n}`,        // ID del documento en Firestore
-        number: n,                        // número dentro de la selección
-        sectionId: team.id,
-        sectionName: team.name,
-        kind,                             // emblem | teamPhoto | player
-        label: label || `Jugador ${playerCounter}`,
-        special: false,
-        foil: kind === 'emblem',          // los escudos suelen ser foil
-        order: order++,
-      });
-    }
-  });
-
-  // --- Secciones especiales ---
-  SPECIAL_SECTIONS.forEach((sec, idx) => {
+  const pushSpecial = (sec, baseOrder) => {
     sections.push({
       id: sec.id,
       type: sec.type,
       name: sec.name,
       slotCount: sec.stickers.length,
-      order: TEAMS.length + idx + 1,
+      order: baseOrder,
     });
     sec.stickers.forEach((sp, n) => {
       stickers.push({
@@ -198,14 +160,51 @@ function build() {
         number: n + 1,
         sectionId: sec.id,
         sectionName: sec.name,
-        kind: 'special',
+        kind: sp.kind,
         label: sp.label,
         special: true,
         foil: !!sp.foil,
         order: order++,
       });
     });
+  };
+
+  // 1) Especiales antes de las selecciones
+  before.forEach((sec, i) => pushSpecial(sec, i + 1));
+
+  // 2) 48 selecciones
+  TEAMS.forEach((team, teamIndex) => {
+    sections.push({
+      id: team.id,
+      type: 'team',
+      name: team.name,
+      code: team.code,
+      slotCount: TEAM_LAYOUT.slotsPerTeam,
+      order: before.length + teamIndex + 1,
+    });
+
+    let playerCounter = 0;
+    for (let n = 1; n <= TEAM_LAYOUT.slotsPerTeam; n++) {
+      const { label, kind } = labelForSlot(n);
+      if (kind === 'player') playerCounter++;
+      stickers.push({
+        code: `${team.code}${n}`,
+        number: n,
+        sectionId: team.id,
+        sectionName: team.name,
+        kind,
+        label: label || `Jugador ${playerCounter}`,
+        special: false,
+        foil: kind === 'emblem',
+        order: order++,
+      });
+    }
   });
+
+  // 3) Especiales después de las selecciones
+  after.forEach((sec, i) =>
+    pushSpecial(sec, before.length + TEAMS.length + i + 1)
+  );
 
   return {
     album: { ...ALBUM, totalSlots: stickers.length, teamCount: TEAMS.length },
@@ -219,9 +218,9 @@ const outPath = path.join(__dirname, 'catalog.json');
 fs.writeFileSync(outPath, JSON.stringify(catalog, null, 2));
 
 console.log('Catálogo generado:');
-console.log(`  Selecciones:      ${catalog.album.teamCount}`);
-console.log(`  Slots por equipo: ${TEAM_LAYOUT.slotsPerTeam}`);
-console.log(`  Cromos de equipos: ${catalog.album.teamCount * TEAM_LAYOUT.slotsPerTeam}`);
-console.log(`  Cromos especiales: ${catalog.stickers.filter(s => s.special).length}`);
-console.log(`  TOTAL slots:       ${catalog.album.totalSlots}`);
-console.log(`  Archivo:           ${outPath}`);
+console.log(`  Selecciones:        ${catalog.album.teamCount}`);
+console.log(`  Slots por equipo:   ${TEAM_LAYOUT.slotsPerTeam}`);
+console.log(`  Cromos de equipos:  ${catalog.album.teamCount * TEAM_LAYOUT.slotsPerTeam}`);
+console.log(`  Cromos especiales:  ${catalog.stickers.filter((s) => s.special).length}`);
+console.log(`  TOTAL slots:        ${catalog.album.totalSlots}`);
+console.log(`  Archivo:            ${outPath}`);

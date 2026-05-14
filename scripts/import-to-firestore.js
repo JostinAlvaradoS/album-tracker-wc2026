@@ -1,12 +1,13 @@
 /**
  * Importa catalog.json a Firestore.
  *
+ * Antes de escribir, BORRA secciones y stickers viejos del catálogo
+ * para que un cambio de orden / cantidad no deje docs huérfanos.
+ * Las colecciones de cada usuario (users/...) NO se tocan.
+ *
  * Requisitos:
  *   npm install firebase-admin
- *   Descarga serviceAccountKey.json desde:
- *     Firebase Console > Configuración del proyecto > Cuentas de servicio
- *     > Generar nueva clave privada
- *   Colócalo junto a este script (NO lo subas a git).
+ *   sa.json en la raíz del proyecto (Firebase Console > Cuentas de servicio).
  *
  * Uso:  node import-to-firestore.js
  */
@@ -15,7 +16,7 @@ const admin = require('firebase-admin');
 const path = require('path');
 const fs = require('fs');
 
-const serviceAccount = require('./serviceAccountKey.json');
+const serviceAccount = require('../sa.json');
 const catalog = JSON.parse(
   fs.readFileSync(path.join(__dirname, 'catalog.json'), 'utf8')
 );
@@ -26,16 +27,36 @@ admin.initializeApp({
 
 const db = admin.firestore();
 
+async function deleteCollection(collRef) {
+  let total = 0;
+  while (true) {
+    const snap = await collRef.limit(500).get();
+    if (snap.empty) break;
+    const batch = db.batch();
+    snap.docs.forEach((d) => batch.delete(d.ref));
+    await batch.commit();
+    total += snap.size;
+    if (snap.size < 500) break;
+  }
+  return total;
+}
+
 async function importCatalog() {
   const albumId = catalog.album.id;
   const albumRef = db.collection('albums').doc(albumId);
+
+  // 0. Limpiar catálogo anterior (no toca users/*)
+  console.log('Limpiando catálogo anterior...');
+  const delSec  = await deleteCollection(albumRef.collection('sections'));
+  const delStk  = await deleteCollection(albumRef.collection('stickers'));
+  console.log(`  ${delSec} secciones y ${delStk} stickers eliminados.`);
 
   // 1. Documento del álbum
   await albumRef.set({
     ...catalog.album,
     updatedAt: admin.firestore.FieldValue.serverTimestamp(),
   });
-  console.log(`Álbum "${albumId}" creado.`);
+  console.log(`Álbum "${albumId}" actualizado.`);
 
   // 2. Secciones
   let batch = db.batch();
@@ -45,14 +66,13 @@ async function importCatalog() {
   await batch.commit();
   console.log(`${catalog.sections.length} secciones importadas.`);
 
-  // 3. Stickers — en lotes de 500 (límite de Firestore por batch)
+  // 3. Stickers en lotes de 500
   const BATCH_SIZE = 500;
   let imported = 0;
   for (let i = 0; i < catalog.stickers.length; i += BATCH_SIZE) {
     const chunk = catalog.stickers.slice(i, i + BATCH_SIZE);
     const b = db.batch();
     chunk.forEach((sticker) => {
-      // el ID del documento es el código del cromo: MEX1, ARG13, etc.
       b.set(albumRef.collection('stickers').doc(sticker.code), sticker);
     });
     await b.commit();

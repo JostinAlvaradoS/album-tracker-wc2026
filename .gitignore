@@ -14,7 +14,7 @@ yarn-error.log*
 angular/.env
 angular/.env.local
 scripts/.env
-
+sa.json
 # Angular build / cache
 angular/dist/
 angular/.angular/
