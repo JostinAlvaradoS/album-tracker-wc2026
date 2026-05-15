@@ -23,54 +23,6 @@ type Filter = 'all' | 'owned' | 'missing' | 'dupe';
   template: `
     <div class="page">
 
-      <!-- ====== HERO: progreso ====== -->
-      <section class="progress" *ngIf="collection() as col">
-        <div class="progress__row">
-          <div class="progress__main">
-            <span class="e26-eyebrow">Progreso del álbum</span>
-            <div class="progress__count">
-              <span class="progress__owned e26-display">{{ col.stats.owned }}</span>
-              <span class="progress__total">/ {{ col.stats.total }}</span>
-            </div>
-            <div class="progress__meta">
-              <span class="meta-item">
-                <span class="dot dot--missing"></span>
-                {{ col.stats.missing }} faltan
-              </span>
-              <span class="meta-item" *ngIf="col.stats.duplicates > 0">
-                <span class="dot dot--dupe"></span>
-                {{ col.stats.duplicates }} repes
-              </span>
-            </div>
-          </div>
-
-          <div class="progress__ring" aria-hidden="true">
-            <svg viewBox="0 0 120 120">
-              <circle cx="60" cy="60" r="52"
-                      fill="none" stroke="var(--e26-surface-2)" stroke-width="10"/>
-              <circle cx="60" cy="60" r="52"
-                      fill="none"
-                      [attr.stroke]="ringComplete(col.stats) ? 'var(--e26-accent)' : 'var(--e26-primary)'"
-                      stroke-width="10"
-                      stroke-linecap="round"
-                      transform="rotate(-90 60 60)"
-                      [attr.stroke-dasharray]="ringCircumference"
-                      [attr.stroke-dashoffset]="ringOffset(col.stats)"
-                      class="ring__fill"/>
-            </svg>
-            <span class="progress__pct e26-display">
-              {{ ringPercent(col.stats) }}<span class="progress__pct-sym">%</span>
-            </span>
-          </div>
-        </div>
-
-        <p class="progress__hint">
-          <span class="e26-code">TAP</span> alterna pegada/falta ·
-          <span class="e26-code">＋</span> suma repe ·
-          <span class="e26-code">－</span> quita una
-        </p>
-      </section>
-
       <!-- ====== SELECTOR DE SECCIÓN ====== -->
       <div class="section-picker">
         <label class="select" [class.select--active]="sectionFilter() !== ''">
@@ -262,105 +214,6 @@ type Filter = 'all' | 'owned' | 'missing' | 'dupe';
       display: flex;
       flex-direction: column;
       gap: var(--e26-space-5);
-    }
-
-    /* ===== HERO PROGRESO ===== */
-    .progress {
-      background: var(--e26-surface);
-      border: 1px solid var(--e26-border);
-      border-radius: var(--e26-radius-lg);
-      padding: var(--e26-space-5);
-      box-shadow: var(--e26-shadow-sm);
-    }
-    .progress__row {
-      display: grid;
-      grid-template-columns: 1fr auto;
-      align-items: center;
-      gap: var(--e26-space-4);
-    }
-    .progress__main { display: flex; flex-direction: column; gap: var(--e26-space-2); }
-    .progress__count {
-      display: flex;
-      align-items: baseline;
-      gap: var(--e26-space-2);
-      line-height: 1;
-    }
-    .progress__owned {
-      font-size: clamp(2.5rem, 8vw, 3.75rem);
-      color: var(--e26-text);
-      font-weight: 700;
-      letter-spacing: -0.04em;
-    }
-    .progress__total {
-      font-size: var(--e26-fs-xl);
-      color: var(--e26-text-subtle);
-      font-family: var(--e26-font-body);
-      font-weight: 500;
-    }
-    .progress__meta {
-      display: flex;
-      gap: var(--e26-space-4);
-      flex-wrap: wrap;
-      margin-top: var(--e26-space-2);
-    }
-    .meta-item {
-      display: inline-flex;
-      align-items: center;
-      gap: var(--e26-space-2);
-      font-size: var(--e26-fs-sm);
-      color: var(--e26-text-muted);
-    }
-    .dot {
-      width: 9px; height: 9px; border-radius: 50%;
-      background: var(--e26-surface-3);
-    }
-    .dot--missing { background: var(--e26-border-strong); }
-    .dot--dupe { background: var(--e26-accent); }
-
-    .progress__ring {
-      position: relative;
-      width: 96px;
-      height: 96px;
-      flex-shrink: 0;
-    }
-    .progress__ring svg { width: 100%; height: 100%; }
-    .ring__fill {
-      transition: stroke-dashoffset var(--e26-dur-slow) var(--e26-ease-out);
-    }
-    .progress__pct {
-      position: absolute;
-      inset: 0;
-      display: grid;
-      place-items: center;
-      font-size: 1.25rem;
-      color: var(--e26-text);
-      line-height: 1;
-    }
-    .progress__pct-sym {
-      font-size: 0.75rem;
-      color: var(--e26-text-subtle);
-      margin-left: 1px;
-    }
-    @media (min-width: 768px) {
-      .progress__ring { width: 120px; height: 120px; }
-      .progress__pct { font-size: 1.5rem; }
-    }
-
-    .progress__hint {
-      margin: var(--e26-space-4) 0 0;
-      font-size: var(--e26-fs-xs);
-      color: var(--e26-text-subtle);
-      display: flex;
-      flex-wrap: wrap;
-      gap: var(--e26-space-2) var(--e26-space-3);
-      align-items: center;
-    }
-    .progress__hint .e26-code {
-      background: var(--e26-surface-2);
-      color: var(--e26-text-muted);
-      padding: 1px 6px;
-      border-radius: 4px;
-      font-size: 10px;
     }
 
     /* ===== SELECTOR DE SECCIÓN ===== */
@@ -904,13 +757,10 @@ export class AlbumViewComponent {
   private collectionService = inject(CollectionService);
   private catalogService = inject(AlbumCatalogService);
 
-  readonly ringCircumference = 2 * Math.PI * 52;
-
   album = toSignal(this.catalogService.getAlbum(ALBUM_ID));
   sections = toSignal(this.viewService.getAlbumView(ALBUM_ID), {
     initialValue: [] as SectionView[],
   });
-  collection = toSignal(this.collectionService.getCollection(ALBUM_ID));
 
   filter = signal<Filter>('all');
   sectionFilter = signal<string>('');
@@ -979,17 +829,6 @@ export class AlbumViewComponent {
     if (f === 'missing') return s.status === 'missing';
     if (f === 'dupe') return s.status === 'duplicate';
     return true;
-  }
-
-  ringPercent(stats: { owned: number; total: number }): number {
-    return stats.total ? Math.round((stats.owned / stats.total) * 100) : 0;
-  }
-  ringOffset(stats: { owned: number; total: number }): number {
-    const pct = this.ringPercent(stats) / 100;
-    return this.ringCircumference * (1 - pct);
-  }
-  ringComplete(stats: { owned: number; total: number }): boolean {
-    return stats.total > 0 && stats.owned === stats.total;
   }
 
   sectionPct(s: SectionView): number {

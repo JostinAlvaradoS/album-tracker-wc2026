@@ -2,12 +2,20 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: 'album', pathMatch: 'full' },
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
   {
     path: 'login',
     loadComponent: () =>
       import('./features/login/login.component').then(
         (m) => m.LoginComponent
+      ),
+  },
+  {
+    path: 'home',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/stats/stats.component').then(
+        (m) => m.StatsComponent
       ),
   },
   {
@@ -34,13 +42,6 @@ export const routes: Routes = [
         (m) => m.DuplicatesComponent
       ),
   },
-  {
-    path: 'stats',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('./features/stats/stats.component').then(
-        (m) => m.StatsComponent
-      ),
-  },
-  { path: '**', redirectTo: 'album' },
+  { path: 'stats', redirectTo: 'home', pathMatch: 'full' },
+  { path: '**', redirectTo: 'home' },
 ];

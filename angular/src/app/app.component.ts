@@ -27,10 +27,10 @@ interface NavRoute {
 }
 
 const NAV_ROUTES: NavRoute[] = [
+  { id: 'home',   path: '/home',   label: 'Home',   title: 'Home',         icon: 'chart' },
   { id: 'album',  path: '/album',  label: 'Álbum',  title: 'Mi álbum',     icon: 'grid'  },
   { id: 'faltas', path: '/faltas', label: 'Faltas', title: 'Me faltan',    icon: 'list'  },
   { id: 'repes',  path: '/repes',  label: 'Repes',  title: 'Mis repes',    icon: 'swap'  },
-  { id: 'stats',  path: '/stats',  label: 'Stats',  title: 'Mi progreso',  icon: 'chart' },
 ];
 
 @Component({
@@ -45,7 +45,7 @@ const NAV_ROUTES: NavRoute[] = [
         <!-- ====== APP BAR ====== -->
         <header class="bar">
           <div class="bar__inner">
-            <a class="brand" routerLink="/album" aria-label="Inicio">
+            <a class="brand" routerLink="/home" aria-label="Inicio">
               <span class="brand__mark" aria-hidden="true">
                 <span class="brand__mark-line"></span>
                 <span class="brand__mark-num e26-display">26</span>
@@ -452,7 +452,7 @@ export class AppComponent {
   pageTitle = computed(() => {
     const url = this.currentUrl();
     const r = this.routes.find(x => url.startsWith(x.path));
-    return r?.title ?? 'Mi álbum';
+    return r?.title ?? 'Home';
   });
 
   constructor() {
