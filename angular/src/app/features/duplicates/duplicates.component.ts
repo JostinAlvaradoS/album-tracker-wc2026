@@ -359,11 +359,11 @@ export class DuplicatesComponent {
   );
 
   inc(s: StickerView) {
-    this.collectionService.addDuplicate(ALBUM_ID, s.code);
+    this.collectionService.addDuplicate(ALBUM_ID, s.code, s.count);
   }
 
   dec(s: StickerView) {
-    this.collectionService.removeOne(ALBUM_ID, s.code);
+    this.collectionService.removeOne(ALBUM_ID, s.code, s.count);
   }
 
   copyList() {

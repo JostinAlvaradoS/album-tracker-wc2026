@@ -867,8 +867,8 @@ export class AlbumViewComponent {
     if (this.busy()) return;
     this.busy.set(true);
     try {
-      if (s.count === 0) await this.collectionService.markOwned(ALBUM_ID, s.code);
-      else                await this.collectionService.markMissing(ALBUM_ID, s.code);
+      if (s.count === 0) await this.collectionService.markOwned(ALBUM_ID, s.code, s.count);
+      else                await this.collectionService.markMissing(ALBUM_ID, s.code, s.count);
     } finally {
       this.busy.set(false);
     }
@@ -879,8 +879,8 @@ export class AlbumViewComponent {
     if (this.busy()) return;
     this.busy.set(true);
     try {
-      if (s.count === 0) await this.collectionService.markOwned(ALBUM_ID, s.code);
-      else                await this.collectionService.addDuplicate(ALBUM_ID, s.code);
+      if (s.count === 0) await this.collectionService.markOwned(ALBUM_ID, s.code, s.count);
+      else                await this.collectionService.addDuplicate(ALBUM_ID, s.code, s.count);
     } finally {
       this.busy.set(false);
     }
@@ -891,7 +891,7 @@ export class AlbumViewComponent {
     if (this.busy()) return;
     this.busy.set(true);
     try {
-      await this.collectionService.removeOne(ALBUM_ID, s.code);
+      await this.collectionService.removeOne(ALBUM_ID, s.code, s.count);
     } finally {
       this.busy.set(false);
     }

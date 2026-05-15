@@ -5,7 +5,8 @@ import {
   collectionData,
   doc,
   docData,
-  getDoc,
+  getDocFromCache,
+  getDocFromServer,
   increment,
   serverTimestamp,
   setDoc,
@@ -59,11 +60,21 @@ export class CollectionService {
     >;
   }
 
-  /** Inicializa el documento de colección si no existe. */
+  /**
+   * Inicializa el documento de colección si no existe.
+   * Lee primero del caché local (0 reads en red si ya fue leído antes).
+   */
   async ensureCollection(albumId: string, totalSlots: number): Promise<void> {
     const ref = doc(this.firestore, this.collectionPath(albumId));
-    const snap = await getDoc(ref);
-    if (!snap.exists()) {
+    let exists = false;
+    try {
+      const cached = await getDocFromCache(ref);
+      exists = cached.exists();
+    } catch {
+      const server = await getDocFromServer(ref);
+      exists = server.exists();
+    }
+    if (!exists) {
       const stats: CollectionStats = {
         owned: 0,
         missing: totalSlots,
@@ -84,9 +95,20 @@ export class CollectionService {
    * count = 1 -> pegado
    * count >= 2 -> tiene (count - 1) repes
    * Actualiza stats denormalizadas en la misma operación atómica.
+   *
+   * `prevCount` lo pasa el caller desde el listener ya activo: evita una
+   * lectura adicional a Firestore por cada mutación.
    */
-  async setStickerCount(albumId: string, stickerId: string, count: number) {
-    const newCount = Math.max(0, Math.floor(count));
+  async setStickerCount(
+    albumId: string,
+    stickerId: string,
+    newCount: number,
+    prevCount: number
+  ) {
+    const safeNew = Math.max(0, Math.floor(newCount));
+    const safePrev = Math.max(0, Math.floor(prevCount));
+
+    if (safePrev === safeNew) return;
 
     const itemRef = doc(
       this.firestore,
@@ -94,31 +116,21 @@ export class CollectionService {
     );
     const colRef = doc(this.firestore, this.collectionPath(albumId));
 
-    // Necesitamos el count anterior para calcular el delta de stats.
-    const prevSnap = await getDoc(itemRef);
-    const prevCount: number = prevSnap.exists()
-      ? (prevSnap.data()['count'] as number)
-      : 0;
-
-    if (prevCount === newCount) return; // sin cambios
-
     const batch = writeBatch(this.firestore);
 
-    if (newCount === 0) {
+    if (safeNew === 0) {
       batch.delete(itemRef);
     } else {
       batch.set(itemRef, {
         stickerId,
-        count: newCount,
+        count: safeNew,
         updatedAt: serverTimestamp(),
       });
     }
 
-    // Deltas para las stats
-    const ownedDelta =
-      (newCount > 0 ? 1 : 0) - (prevCount > 0 ? 1 : 0);
+    const ownedDelta = (safeNew > 0 ? 1 : 0) - (safePrev > 0 ? 1 : 0);
     const dupDelta =
-      Math.max(0, newCount - 1) - Math.max(0, prevCount - 1);
+      Math.max(0, safeNew - 1) - Math.max(0, safePrev - 1);
 
     batch.set(
       colRef,
@@ -136,34 +148,32 @@ export class CollectionService {
   }
 
   /** Marca un cromo como pegado (count = 1). */
-  markOwned(albumId: string, stickerId: string) {
-    return this.setStickerCount(albumId, stickerId, 1);
+  markOwned(albumId: string, stickerId: string, prevCount: number) {
+    return this.setStickerCount(albumId, stickerId, 1, prevCount);
   }
 
   /** Quita un cromo del inventario (count = 0). */
-  markMissing(albumId: string, stickerId: string) {
-    return this.setStickerCount(albumId, stickerId, 0);
+  markMissing(albumId: string, stickerId: string, prevCount: number) {
+    return this.setStickerCount(albumId, stickerId, 0, prevCount);
   }
 
   /** Suma una repe. */
-  async addDuplicate(albumId: string, stickerId: string) {
-    const itemRef = doc(
-      this.firestore,
-      `${this.collectionPath(albumId)}/items/${stickerId}`
+  addDuplicate(albumId: string, stickerId: string, currentCount: number) {
+    return this.setStickerCount(
+      albumId,
+      stickerId,
+      currentCount + 1,
+      currentCount
     );
-    const snap = await getDoc(itemRef);
-    const current = snap.exists() ? (snap.data()['count'] as number) : 0;
-    return this.setStickerCount(albumId, stickerId, current + 1);
   }
 
   /** Resta una unidad (de repe o hasta dejarlo en falta). */
-  async removeOne(albumId: string, stickerId: string) {
-    const itemRef = doc(
-      this.firestore,
-      `${this.collectionPath(albumId)}/items/${stickerId}`
+  removeOne(albumId: string, stickerId: string, currentCount: number) {
+    return this.setStickerCount(
+      albumId,
+      stickerId,
+      currentCount - 1,
+      currentCount
     );
-    const snap = await getDoc(itemRef);
-    const current = snap.exists() ? (snap.data()['count'] as number) : 0;
-    return this.setStickerCount(albumId, stickerId, current - 1);
   }
 }
