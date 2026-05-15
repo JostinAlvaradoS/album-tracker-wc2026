@@ -1,0 +1,236 @@
+// =============================================================
+//  PANINI WC2026 — Sistema de diseño "Línea 26"
+//  Identidad ORIGINAL para tracker de álbum del mundial.
+//  Dirección: moderna y limpia, color como acento puntual.
+//  No contiene marca oficial de FIFA.
+// =============================================================
+
+// ---- Paleta cruda ----
+$raw-ink-950:    #0d1117;
+$raw-ink-800:    #1f2733;
+$raw-ink-600:    #475061;
+$raw-ink-400:    #8b94a3;
+$raw-ink-200:    #d6dae1;
+$raw-ink-100:    #e9ecf1;
+$raw-ink-50:     #f4f6f9;
+$raw-white:      #ffffff;
+
+$raw-slate-950:  #0e1116;
+$raw-slate-900:  #161b22;
+$raw-slate-800:  #20262f;
+$raw-slate-700:  #2d3540;
+
+$raw-green-600:  #11a14a;
+$raw-green-500:  #1cc25c;
+$raw-green-100:  #d9f6e3;
+
+$raw-amber-600:  #d98700;
+$raw-amber-500:  #f5a623;
+$raw-amber-100:  #fdeecb;
+
+$raw-blue-600:   #2563eb;
+$raw-blue-500:   #3b82f6;
+$raw-blue-100:   #dbe7fe;
+
+$raw-red-600:    #dc2626;
+
+// ---- Tokens semánticos (modo claro por defecto) ----
+:root {
+  --e26-bg:            #{$raw-ink-50};
+  --e26-surface:       #{$raw-white};
+  --e26-surface-2:     #{$raw-ink-100};
+  --e26-surface-3:     #{$raw-ink-200};
+  --e26-overlay:       rgba(13, 17, 23, .45);
+
+  --e26-text:          #{$raw-ink-950};
+  --e26-text-muted:    #{$raw-ink-600};
+  --e26-text-subtle:   #{$raw-ink-400};
+  --e26-text-inverse:  #{$raw-white};
+
+  --e26-border:        #{$raw-ink-200};
+  --e26-border-strong: #{$raw-ink-400};
+
+  --e26-primary:       #{$raw-green-600};
+  --e26-primary-press: #{$raw-green-500};
+  --e26-primary-soft:  #{$raw-green-100};
+  --e26-primary-on:    #{$raw-white};
+
+  --e26-accent:        #{$raw-amber-600};
+  --e26-accent-soft:   #{$raw-amber-100};
+  --e26-accent-on:     #{$raw-white};
+
+  --e26-info:          #{$raw-blue-600};
+  --e26-info-soft:     #{$raw-blue-100};
+  --e26-info-on:       #{$raw-white};
+
+  --e26-success:       #{$raw-green-600};
+  --e26-warning:       #{$raw-amber-600};
+  --e26-danger:        #{$raw-red-600};
+
+  --e26-sticker-owned:   var(--e26-primary);
+  --e26-sticker-missing: var(--e26-surface-2);
+  --e26-sticker-dupe:    var(--e26-accent);
+
+  --e26-font-display: 'Clash Grotesk', 'Archivo', system-ui, sans-serif;
+  --e26-font-body:    'Inter', system-ui, sans-serif;
+  --e26-font-mono:    'JetBrains Mono', ui-monospace, monospace;
+
+  --e26-fs-3xl: 2.25rem;
+  --e26-fs-2xl: 1.75rem;
+  --e26-fs-xl:  1.3125rem;
+  --e26-fs-lg:  1.0625rem;
+  --e26-fs-md:  0.9375rem;
+  --e26-fs-sm:  0.8125rem;
+  --e26-fs-xs:  0.6875rem;
+
+  --e26-lh-tight: 1.1;
+  --e26-lh-snug:  1.3;
+  --e26-lh-base:  1.55;
+
+  --e26-tracking-display: -0.02em;
+  --e26-tracking-caps:    0.06em;
+
+  --e26-space-1:  0.25rem;
+  --e26-space-2:  0.5rem;
+  --e26-space-3:  0.75rem;
+  --e26-space-4:  1rem;
+  --e26-space-5:  1.5rem;
+  --e26-space-6:  2rem;
+  --e26-space-7:  3rem;
+  --e26-space-8:  4rem;
+
+  --e26-radius-sm:   8px;
+  --e26-radius-md:   12px;
+  --e26-radius-lg:   16px;
+  --e26-radius-xl:   22px;
+  --e26-radius-pill: 999px;
+
+  --e26-shadow-sm: 0 1px 2px rgba(13, 17, 23, .06);
+  --e26-shadow-md: 0 2px 8px rgba(13, 17, 23, .08), 0 1px 2px rgba(13, 17, 23, .04);
+  --e26-shadow-lg: 0 8px 28px rgba(13, 17, 23, .12), 0 2px 6px rgba(13, 17, 23, .06);
+  --e26-ring-primary: 0 0 0 1px var(--e26-primary);
+  --e26-ring-info:    0 0 0 1px var(--e26-info);
+
+  --e26-dur-fast:   120ms;
+  --e26-dur-base:   200ms;
+  --e26-dur-slow:   320ms;
+  --e26-dur-reveal: 460ms;
+  --e26-ease-out:   cubic-bezier(.22, 1, .36, 1);
+  --e26-ease-in:    cubic-bezier(.55, 0, 1, .45);
+  --e26-ease-spring:cubic-bezier(.34, 1.4, .64, 1);
+
+  --e26-z-base:    0;
+  --e26-z-sticky:  100;
+  --e26-z-nav:     200;
+  --e26-z-overlay: 900;
+  --e26-z-modal:   1000;
+  --e26-z-toast:   1100;
+
+  --e26-safe-top:    env(safe-area-inset-top, 0px);
+  --e26-safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+// ---- Modo oscuro ----
+:root[data-theme='dark'],
+.e26-dark {
+  --e26-bg:            #{$raw-slate-950};
+  --e26-surface:       #{$raw-slate-900};
+  --e26-surface-2:     #{$raw-slate-800};
+  --e26-surface-3:     #{$raw-slate-700};
+  --e26-overlay:       rgba(0, 0, 0, .60);
+
+  --e26-text:          #{$raw-ink-50};
+  --e26-text-muted:    #{$raw-ink-200};
+  --e26-text-subtle:   #{$raw-ink-400};
+  --e26-text-inverse:  #{$raw-slate-950};
+
+  --e26-border:        rgba(255, 255, 255, .10);
+  --e26-border-strong: rgba(255, 255, 255, .22);
+
+  --e26-primary:       #{$raw-green-500};
+  --e26-primary-soft:  rgba(28, 194, 92, .14);
+  --e26-accent:        #{$raw-amber-500};
+  --e26-accent-soft:   rgba(245, 166, 35, .16);
+  --e26-info:          #{$raw-blue-500};
+  --e26-info-soft:     rgba(59, 130, 246, .16);
+
+  --e26-shadow-sm: 0 1px 2px rgba(0, 0, 0, .40);
+  --e26-shadow-md: 0 2px 8px rgba(0, 0, 0, .45);
+  --e26-shadow-lg: 0 8px 28px rgba(0, 0, 0, .55);
+}
+
+// ---- Reset y base ----
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--e26-bg);
+  color: var(--e26-text);
+  font-family: var(--e26-font-body);
+  font-size: var(--e26-fs-md);
+  line-height: var(--e26-lh-base);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body {
+  min-height: 100dvh;
+}
+
+// scrollbar gutter para evitar saltos al abrir el grid
+html { scrollbar-gutter: stable; }
+
+// foco accesible global
+:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--e26-bg), 0 0 0 4px var(--e26-info);
+  border-radius: var(--e26-radius-sm);
+}
+
+button, a {
+  font-family: inherit;
+  color: inherit;
+}
+
+// ---- Utilidades tipográficas ----
+.e26-display {
+  font-family: var(--e26-font-display);
+  letter-spacing: var(--e26-tracking-display);
+  line-height: var(--e26-lh-tight);
+  font-weight: 600;
+}
+
+.e26-code {
+  font-family: var(--e26-font-mono);
+  letter-spacing: var(--e26-tracking-caps);
+  font-variant-numeric: tabular-nums;
+}
+
+.e26-eyebrow {
+  font-size: var(--e26-fs-xs);
+  letter-spacing: var(--e26-tracking-caps);
+  text-transform: uppercase;
+  color: var(--e26-text-subtle);
+  font-weight: 600;
+}
+
+// ---- Wrapper de contenido (ancho máximo, márgenes responsive) ----
+.e26-container {
+  width: 100%;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: var(--e26-space-4);
+
+  @media (min-width: 768px) { padding: var(--e26-space-5); }
+  @media (min-width: 1024px) { padding: var(--e26-space-6); }
+}
+
+// ---- Reglas de animación globales ----
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}

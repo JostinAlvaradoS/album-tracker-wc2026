@@ -13,9 +13,9 @@ const fs = require('fs');
 const path = require('path');
 
 const TEAM_LAYOUT = {
-  slotsPerTeam: 20,    // El álbum WC2026 trae 20 cromos por selección
+  slotsPerTeam: 21,    // 21 cromos por selección (1 escudo + 1 foto + 19 jugadores)
   emblemSlot: 1,       // MEX1 = escudo (foil)
-  teamPhotoSlot: 2,    // MEX2 = foto del equipo (horizontal)
+  teamPhotoSlot: 13,   // MEX13 = foto del equipo (horizontal)
 };
 
 // 48 selecciones en el orden EXACTO de la planilla de control
@@ -82,6 +82,7 @@ const SPECIAL_SECTIONS = [
     name: 'FIFA World Cup 2026',
     placement: 'before',
     stickers: [
+      { code: '00',   label: 'Logo Panini',             foil: false, kind: 'special' },
       { code: 'FWC1', label: 'Official Emblem',         foil: true,  kind: 'special' },
       { code: 'FWC2', label: 'Official Emblem',         foil: true,  kind: 'special' },
       { code: 'FWC3', label: 'Official Mascots',        foil: false, kind: 'special' },
