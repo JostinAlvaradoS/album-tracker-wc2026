@@ -13,7 +13,7 @@ const fs = require('fs');
 const path = require('path');
 
 const TEAM_LAYOUT = {
-  slotsPerTeam: 21,    // 21 cromos por selección (1 escudo + 1 foto + 19 jugadores)
+  slotsPerTeam: 20,    // 20 cromos por selección (1 escudo + 1 foto + 18 jugadores)
   emblemSlot: 1,       // MEX1 = escudo (foil)
   teamPhotoSlot: 13,   // MEX13 = foto del equipo (horizontal)
 };
