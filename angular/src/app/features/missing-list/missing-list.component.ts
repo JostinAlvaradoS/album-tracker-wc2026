@@ -35,7 +35,7 @@ interface MissingGroup {
             <span class="hero__suffix">cromos pendientes</span>
           </h1>
           <p class="hero__text">
-            Compartí esta lista con quien intercambies.
+            Comparte esta lista con quien intercambies.
             Cada código corresponde a un slot del álbum.
           </p>
         </div>

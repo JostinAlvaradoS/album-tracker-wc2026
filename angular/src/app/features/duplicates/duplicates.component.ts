@@ -31,7 +31,7 @@ const ALBUM_ID = 'wc2026';
           </h1>
           <p class="hero__text">
             <span class="hero__count">{{ duplicates().length }}</span>
-            cromos distintos repetidos. Compartí la lista o ajustá las
+            cromos distintos repetidos. Comparte la lista o ajusta las
             cantidades con
             <span class="e26-code">+</span> / <span class="e26-code">−</span>.
           </p>
@@ -102,7 +102,7 @@ const ALBUM_ID = 'wc2026';
           <span class="empty__num e26-display">0</span>
           <p class="empty__title e26-display">Sin repes</p>
           <p class="empty__text">
-            No tenés cromos repetidos. Cuando te toque uno duplicado,
+            No tienes cromos repetidos. Cuando te toque uno duplicado,
             aparecerá aquí listo para intercambiar.
           </p>
         </div>

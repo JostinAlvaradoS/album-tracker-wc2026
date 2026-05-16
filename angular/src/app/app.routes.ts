@@ -42,6 +42,14 @@ export const routes: Routes = [
         (m) => m.DuplicatesComponent
       ),
   },
+  {
+    path: 'comparador',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/comparator/comparator.component').then(
+        (m) => m.ComparatorComponent
+      ),
+  },
   { path: 'stats', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' },
 ];

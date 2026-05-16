@@ -92,7 +92,7 @@ const ALBUM_ID = 'wc2026';
 
       <!-- ====== NOTA ====== -->
       <p class="note">
-        Tenés <strong class="note__big">{{ p.totalStickersOwned }}</strong>
+        Tienes <strong class="note__big">{{ p.totalStickersOwned }}</strong>
         cromos en total <span class="note__split">·</span>
         <span class="e26-code">{{ p.owned }}</span> distintos
         <span class="note__plus">+</span>
