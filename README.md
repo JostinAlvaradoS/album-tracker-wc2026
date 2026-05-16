@@ -72,21 +72,23 @@ antes de cada `npm start` / `npm run build`. El `.env` está en `.gitignore`.
 
 ### 4. Importar el catálogo
 
-El catálogo (994 cromos) se genera y sube desde `scripts/`:
+`scripts/catalog.json` ya viene en el repo (994 cromos del Mundial 2026, ~232KB).
+Solo lo subes a tu Firestore.
+
+Necesitas una clave de servicio para que el script tenga permisos:
+
+1. Firebase Console → **Project settings → Service accounts → Generate new private key**.
+2. Guarda el JSON como `scripts/serviceAccountKey.json` (en `.gitignore`).
 
 ```bash
 cd scripts
-node generate-catalog.js          # genera catalog.json (~1MB)
-```
-
-Para subirlo a Firestore necesitas una clave de servicio:
-
-1. Firebase Console → **Project settings → Service accounts → Generate new private key**.
-2. Guarda el JSON como `scripts/serviceAccountKey.json` (ya está en `.gitignore`).
-
-```bash
+npm install                       # solo la primera vez
 node import-to-firestore.js       # sube los 994 cromos
 ```
+
+> **¿Quieres modificar el catálogo?** Edita `scripts/generate-catalog.js`
+> (es la fuente de verdad de la estructura) y corre `node generate-catalog.js`
+> para regenerar `catalog.json` antes del import.
 
 ### 5. Reglas de Firestore
 

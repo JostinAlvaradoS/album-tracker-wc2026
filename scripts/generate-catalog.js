@@ -1,10 +1,10 @@
 /**
- * Generador del catálogo del álbum Panini FIFA World Cup 2026
- * -----------------------------------------------------------
- * Produce catalog.json listo para importar a Firestore.
+ * Generador del catálogo del álbum del Mundial 2026.
+ * Produce catalog.json listo para import-to-firestore.js.
  *
- * El orden de selecciones y el contenido FWC siguen la Planilla de
- * Control oficial del álbum (ideasparaimprimir.com).
+ * Solo necesitas correrlo si modificas la estructura del álbum
+ * (otros nombres, otra cantidad de slots, otro álbum). El catalog.json
+ * resultante ya está versionado en el repo.
  *
  * Uso:  node generate-catalog.js
  */

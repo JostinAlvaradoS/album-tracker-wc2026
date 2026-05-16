@@ -25,7 +25,6 @@ angular/src/environments/environment.ts
 
 # Firebase Admin SDK (credenciales privadas)
 scripts/serviceAccountKey.json
-scripts/catalog.json
 
 # Firebase CLI
 .firebase/
