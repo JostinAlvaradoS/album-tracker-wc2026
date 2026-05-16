@@ -1,25 +1,27 @@
 import {
   Component,
   computed,
+  effect,
   inject,
   signal,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { NgIf, NgFor, NgClass, UpperCasePipe } from '@angular/common';
+import { NgIf, NgFor, UpperCasePipe } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AlbumViewService } from '../../core/services/album-view.service';
 import { CollectionService } from '../../core/services/collection.service';
 import { AlbumCatalogService } from '../../core/services/album-catalog.service';
 import { SectionView, StickerView } from '../../core/models/album.model';
+import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
+import { StickerCellComponent } from './sticker-cell/sticker-cell.component';
 
-const ALBUM_ID = 'wc2026';
 type Filter = 'all' | 'owned' | 'missing' | 'dupe';
 
 @Component({
   selector: 'app-album-view',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIf, NgFor, NgClass, UpperCasePipe],
+  imports: [NgIf, NgFor, UpperCasePipe, StickerCellComponent],
   template: `
     <div class="page">
 
@@ -142,57 +144,13 @@ type Filter = 'all' | 'owned' | 'missing' | 'dupe';
           </header>
 
           <div class="grid">
-            <button
+            <app-sticker-cell
               *ngFor="let s of filteredStickers(section); trackBy: trackSticker"
-              type="button"
-              class="cell"
-              [ngClass]="{
-                'cell--owned':    s.status === 'owned',
-                'cell--dupe':     s.status === 'duplicate',
-                'cell--missing':  s.status === 'missing',
-                'cell--emblem':   s.kind === 'emblem',
-                'cell--special':  s.kind === 'special',
-                'cell--photo':    s.kind === 'teamPhoto',
-                'cell--foil':     s.foil
-              }"
-              [attr.aria-label]="ariaFor(s)"
-              [attr.aria-pressed]="s.status !== 'missing'"
-              (click)="cycle(s)"
-              (contextmenu)="addDup($event, s)">
-
-              <span class="cell__face">
-                <span class="cell__kind e26-code" aria-hidden="true">
-                  {{ kindLabel(s.kind) }}
-                </span>
-
-                <span class="cell__big e26-display">
-                  {{ bigLabel(s) }}
-                </span>
-
-                <span class="cell__code e26-code">{{ s.code }}</span>
-              </span>
-
-              <span class="cell__check" *ngIf="s.status === 'owned'" aria-hidden="true">
-                <svg viewBox="0 0 16 16" width="11" height="11">
-                  <path d="M3 8.5l3 3 7-7" fill="none" stroke="currentColor"
-                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </span>
-
-              <span class="cell__dupes e26-code" *ngIf="s.status === 'duplicate'">
-                ×{{ s.count }}
-              </span>
-
-              <span class="cell__actions">
-                <button type="button" class="act act--minus"
-                        *ngIf="s.count > 0"
-                        (click)="dec($event, s)"
-                        aria-label="Quitar una">−</button>
-                <button type="button" class="act act--plus"
-                        (click)="inc($event, s)"
-                        [attr.aria-label]="s.count === 0 ? 'Marcar pegada' : 'Sumar repe'">+</button>
-              </span>
-            </button>
+              [sticker]="s"
+              (cycle)="cycle(s)"
+              (inc)="inc(s)"
+              (dec)="dec(s)"
+              (addDup)="inc(s)" />
           </div>
         </section>
       </ng-container>
@@ -514,218 +472,6 @@ type Filter = 'all' | 'owned' | 'missing' | 'dupe';
     @media (min-width: 1024px) { .grid { grid-template-columns: repeat(8, 1fr); } }
     @media (min-width: 1280px) { .grid { grid-template-columns: repeat(9, 1fr); } }
 
-    /* ===== CELDA ===== */
-    .cell {
-      all: unset;
-      position: relative;
-      cursor: pointer;
-      aspect-ratio: 3 / 4;
-      width: 100%;
-      border-radius: var(--e26-radius-md);
-      overflow: hidden;
-      isolation: isolate;
-      transition: transform var(--e26-dur-fast) var(--e26-ease-out);
-    }
-    .cell:active { transform: scale(0.97); }
-    .cell:focus-visible {
-      box-shadow: 0 0 0 2px var(--e26-bg), 0 0 0 4px var(--e26-info);
-    }
-
-    .cell__face {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 2px;
-      background: var(--e26-surface);
-      border: 1px solid var(--e26-border);
-      border-radius: inherit;
-      transition: background var(--e26-dur-base) var(--e26-ease-out),
-                  border-color var(--e26-dur-base) var(--e26-ease-out),
-                  color var(--e26-dur-base) var(--e26-ease-out);
-    }
-
-    .cell__kind {
-      position: absolute;
-      top: 5px;
-      left: 6px;
-      font-size: 9px;
-      color: var(--e26-text-subtle);
-      letter-spacing: 0.08em;
-    }
-    .cell__big {
-      font-size: clamp(1rem, 4.5vw, 1.5rem);
-      font-weight: 700;
-      color: var(--e26-text);
-      line-height: 1;
-      letter-spacing: -0.03em;
-    }
-    .cell__code {
-      position: absolute;
-      bottom: 5px;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 10px;
-      color: var(--e26-text-subtle);
-      background: var(--e26-surface);
-      padding: 1px 5px;
-      border-radius: 4px;
-      max-width: calc(100% - 12px);
-      text-align: center;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
-    /* ----- estado missing ----- */
-    .cell--missing .cell__face {
-      background:
-        repeating-linear-gradient(
-          135deg,
-          var(--e26-surface) 0,
-          var(--e26-surface) 6px,
-          var(--e26-surface-2) 6px,
-          var(--e26-surface-2) 7px
-        );
-      border-style: dashed;
-      border-color: var(--e26-border);
-    }
-    .cell--missing .cell__big { color: var(--e26-text-subtle); }
-    .cell--missing .cell__code { color: var(--e26-text-subtle); }
-
-    /* ----- estado owned ----- */
-    .cell--owned .cell__face {
-      background: var(--e26-surface);
-      border-color: var(--e26-primary);
-      box-shadow: 0 0 0 1px var(--e26-primary) inset, var(--e26-shadow-sm);
-    }
-    .cell--owned .cell__big { color: var(--e26-text); }
-    .cell__check {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      width: 18px;
-      height: 18px;
-      display: grid;
-      place-items: center;
-      background: var(--e26-primary);
-      color: var(--e26-primary-on);
-      border-radius: var(--e26-radius-pill);
-      z-index: 2;
-      animation: check-pop var(--e26-dur-reveal) var(--e26-ease-spring) both;
-    }
-    @keyframes check-pop {
-      from { transform: scale(.4); opacity: 0; }
-      to   { transform: scale(1);  opacity: 1; }
-    }
-
-    /* ----- estado dupe ----- */
-    .cell--dupe .cell__face {
-      background: var(--e26-surface);
-      border-color: var(--e26-accent);
-      box-shadow: 0 0 0 1px var(--e26-accent) inset, var(--e26-shadow-sm);
-    }
-    .cell__dupes {
-      position: absolute;
-      top: 5px;
-      right: 5px;
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--e26-accent-on);
-      background: var(--e26-accent);
-      border-radius: var(--e26-radius-pill);
-      padding: 1px 6px;
-      line-height: 1.4;
-      z-index: 2;
-    }
-
-    /* ----- variantes por tipo ----- */
-    .cell--emblem .cell__face {
-      border-radius: 50% 50% var(--e26-radius-md) var(--e26-radius-md);
-    }
-    .cell--photo {
-      grid-column: span 2;
-      aspect-ratio: 16 / 10;
-    }
-    .cell--photo .cell__face {
-      background-image: linear-gradient(
-        180deg,
-        var(--e26-surface) 0%,
-        var(--e26-surface) 65%,
-        var(--e26-surface-2) 100%
-      );
-    }
-    .cell--special .cell__face {
-      background: var(--e26-surface-2);
-    }
-    .cell--foil .cell__face::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      background: linear-gradient(
-        125deg,
-        transparent 30%,
-        rgba(245, 197, 24, 0.18) 45%,
-        rgba(59, 130, 246, 0.12) 55%,
-        transparent 70%
-      );
-      mix-blend-mode: overlay;
-    }
-    .cell--foil .cell__face {
-      border-color: #d4a017;
-    }
-
-    /* ----- acciones ----- */
-    .cell__actions {
-      position: absolute;
-      bottom: 5px;
-      left: 5px;
-      right: 5px;
-      display: flex;
-      justify-content: space-between;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity var(--e26-dur-fast) var(--e26-ease-out);
-      z-index: 3;
-    }
-    .cell:hover .cell__actions,
-    .cell:focus-within .cell__actions {
-      opacity: 1;
-    }
-    .act {
-      pointer-events: auto;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      border: 0;
-      background: var(--e26-text);
-      color: var(--e26-text-inverse);
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 700;
-      line-height: 1;
-      display: grid;
-      place-items: center;
-      box-shadow: var(--e26-shadow-md);
-      transition: transform var(--e26-dur-fast) var(--e26-ease-out),
-                  background var(--e26-dur-fast) var(--e26-ease-out);
-    }
-    .act:hover { transform: scale(1.08); }
-    .act:active { transform: scale(0.94); }
-    .act--minus { background: var(--e26-surface); color: var(--e26-text); border: 1px solid var(--e26-border); }
-    .act--plus { background: var(--e26-primary); color: var(--e26-primary-on); margin-left: auto; }
-    .cell--owned .act--plus,
-    .cell--dupe .act--plus { background: var(--e26-accent); }
-
-    /* En móvil, siempre visibles (sin hover) */
-    @media (hover: none), (max-width: 767px) {
-      .cell__actions { opacity: 1; }
-      .act { width: 22px; height: 22px; font-size: 13px; }
-    }
-
     /* ===== empty ===== */
     .empty {
       text-align: center;
@@ -756,9 +502,10 @@ export class AlbumViewComponent {
   private viewService = inject(AlbumViewService);
   private collectionService = inject(CollectionService);
   private catalogService = inject(AlbumCatalogService);
+  private albumId = inject(CURRENT_ALBUM_ID);
 
-  album = toSignal(this.catalogService.getAlbum(ALBUM_ID));
-  sections = toSignal(this.viewService.getAlbumView(ALBUM_ID), {
+  album = toSignal(this.catalogService.getAlbum(this.albumId));
+  sections = toSignal(this.viewService.getAlbumView(this.albumId), {
     initialValue: [] as SectionView[],
   });
 
@@ -798,12 +545,16 @@ export class AlbumViewComponent {
   });
 
   constructor() {
-    const a = this.album;
-    queueMicrotask(async () => {
-      const album = a();
-      if (album) {
-        await this.collectionService.ensureCollection(ALBUM_ID, album.totalSlots);
-      }
+    // ensureCollection() es idempotente pero costoso; lo dispara una sola vez
+    // cuando el catálogo emite el doc del álbum por primera vez.
+    let ensured = false;
+    effect(() => {
+      const album = this.album();
+      if (!album || ensured) return;
+      ensured = true;
+      this.collectionService
+        .ensureCollection(this.albumId, album.totalSlots)
+        .catch((err) => console.error('ensureCollection failed', err));
     });
   }
 
@@ -839,67 +590,42 @@ export class AlbumViewComponent {
     return String(order).padStart(2, '0');
   }
 
-  kindLabel(kind: string): string {
-    switch (kind) {
-      case 'emblem':    return 'ESCUDO';
-      case 'teamPhoto': return 'FOTO';
-      case 'special':   return 'ESP.';
-      case 'player':    return 'PLR';
-      default:          return '';
-    }
-  }
-
-  bigLabel(s: StickerView): string {
-    if (s.kind === 'emblem') return s.code.replace(/\d+$/, '').slice(0, 3) || '◆';
-    if (s.kind === 'teamPhoto') return '▭';
-    if (s.kind === 'special') return s.code.replace(/[0-9]/g, '').slice(0, 3) || '★';
-    return String(s.number).padStart(2, '0');
-  }
-
-  ariaFor(s: StickerView): string {
-    const estado = s.status === 'owned' ? 'pegada'
-      : s.status === 'duplicate' ? `con ${s.count - 1} repe${s.count - 1 === 1 ? '' : 's'}`
-      : 'faltante';
-    return `Figurita ${s.code}, ${s.label}, ${estado}`;
-  }
-
   async cycle(s: StickerView) {
     if (this.busy()) return;
     this.busy.set(true);
     try {
-      if (s.count === 0) await this.collectionService.markOwned(ALBUM_ID, s.code, s.count);
-      else                await this.collectionService.markMissing(ALBUM_ID, s.code, s.count);
+      if (s.count === 0) await this.collectionService.markOwned(this.albumId, s.code, s.count);
+      else                await this.collectionService.markMissing(this.albumId, s.code, s.count);
+    } catch (err) {
+      console.error('cycle failed', err);
     } finally {
       this.busy.set(false);
     }
   }
 
-  async inc(event: Event, s: StickerView) {
-    event.stopPropagation();
+  async inc(s: StickerView) {
     if (this.busy()) return;
     this.busy.set(true);
     try {
-      if (s.count === 0) await this.collectionService.markOwned(ALBUM_ID, s.code, s.count);
-      else                await this.collectionService.addDuplicate(ALBUM_ID, s.code, s.count);
+      if (s.count === 0) await this.collectionService.markOwned(this.albumId, s.code, s.count);
+      else                await this.collectionService.addDuplicate(this.albumId, s.code, s.count);
+    } catch (err) {
+      console.error('inc failed', err);
     } finally {
       this.busy.set(false);
     }
   }
 
-  async dec(event: Event, s: StickerView) {
-    event.stopPropagation();
+  async dec(s: StickerView) {
     if (this.busy()) return;
     this.busy.set(true);
     try {
-      await this.collectionService.removeOne(ALBUM_ID, s.code, s.count);
+      await this.collectionService.removeOne(this.albumId, s.code, s.count);
+    } catch (err) {
+      console.error('dec failed', err);
     } finally {
       this.busy.set(false);
     }
-  }
-
-  async addDup(event: MouseEvent, s: StickerView) {
-    event.preventDefault();
-    return this.inc(event, s);
   }
 
   trackSection = (_: number, s: SectionView) => s.id;

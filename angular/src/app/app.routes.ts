@@ -50,6 +50,5 @@ export const routes: Routes = [
         (m) => m.ComparatorComponent
       ),
   },
-  { path: 'stats', redirectTo: 'home', pathMatch: 'full' },
   { path: '**', redirectTo: 'home' },
 ];

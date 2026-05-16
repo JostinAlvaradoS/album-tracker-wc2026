@@ -29,12 +29,31 @@ if (missing.length) {
   process.exit(1);
 }
 
+const albumId = (process.env.NG_APP_ALBUM_ID || 'wc2026').trim();
+
+const allowedEmails = (process.env.NG_APP_ALLOWED_EMAILS || '')
+  .split(',')
+  .map((s) => s.trim().toLowerCase())
+  .filter(Boolean);
+
 const target = path.join(__dirname, '..', 'src', 'environments', 'environment.ts');
 fs.mkdirSync(path.dirname(target), { recursive: true });
 
 const contents = `// Archivo GENERADO por scripts/set-env.js a partir de .env.
 // No editar a mano, no versionar.
-export const environment = {
+export const environment: {
+  production: boolean;
+  firebase: {
+    apiKey: string;
+    authDomain: string;
+    projectId: string;
+    storageBucket: string;
+    messagingSenderId: string;
+    appId: string;
+  };
+  albumId: string;
+  allowedEmails: string[];
+} = {
   production: ${process.env.NODE_ENV === 'production'},
   firebase: {
     apiKey: ${JSON.stringify(process.env.NG_APP_FIREBASE_API_KEY)},
@@ -44,8 +63,15 @@ export const environment = {
     messagingSenderId: ${JSON.stringify(process.env.NG_APP_FIREBASE_MESSAGING_SENDER_ID)},
     appId: ${JSON.stringify(process.env.NG_APP_FIREBASE_APP_ID)},
   },
+  albumId: ${JSON.stringify(albumId)},
+  allowedEmails: ${JSON.stringify(allowedEmails)},
 };
 `;
 
 fs.writeFileSync(target, contents, 'utf8');
-console.log('[set-env] environment.ts generado para proyecto', process.env.NG_APP_FIREBASE_PROJECT_ID);
+console.log(
+  '[set-env] environment.ts generado',
+  '\n  projectId   :', process.env.NG_APP_FIREBASE_PROJECT_ID,
+  '\n  albumId     :', albumId,
+  '\n  whitelist   :', allowedEmails.length === 0 ? '(abierta)' : `${allowedEmails.length} email(s)`
+);

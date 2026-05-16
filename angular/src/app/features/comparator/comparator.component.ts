@@ -12,8 +12,8 @@ import { NgIf, NgFor, NgSwitch, NgSwitchCase } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AlbumViewService } from '../../core/services/album-view.service';
 import { StickerView } from '../../core/models/album.model';
+import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
 
-const ALBUM_ID = 'wc2026';
 const MAX_RECENTS = 8;
 
 type ResultState = 'idle' | 'invalid' | 'missing' | 'owned' | 'duplicate';
@@ -66,6 +66,8 @@ interface RecentEntry {
             autocapitalize="characters"
             spellcheck="false"
             inputmode="text"
+            maxlength="6"
+            pattern="[A-Z0-9]*"
             placeholder="ARG13"
             aria-label="Código del cromo"
             [value]="rawInput()"
@@ -620,10 +622,11 @@ interface RecentEntry {
 })
 export class ComparatorComponent implements AfterViewInit {
   private albumView = inject(AlbumViewService);
+  private albumId = inject(CURRENT_ALBUM_ID);
 
   @ViewChild('codeInput') codeInputRef?: ElementRef<HTMLInputElement>;
 
-  private sections = toSignal(this.albumView.getAlbumView(ALBUM_ID), {
+  private sections = toSignal(this.albumView.getAlbumView(this.albumId), {
     initialValue: [],
   });
 
@@ -669,7 +672,16 @@ export class ComparatorComponent implements AfterViewInit {
   }
 
   onInput(ev: Event): void {
-    this.rawInput.set((ev.target as HTMLInputElement).value);
+    const el = ev.target as HTMLInputElement;
+    // Solo letras y dígitos; descarta espacios, símbolos y acentos.
+    const cleaned = el.value
+      .toUpperCase()
+      .replace(/[^A-Z0-9]/g, '')
+      .slice(0, 6);
+    if (cleaned !== el.value) {
+      el.value = cleaned;
+    }
+    this.rawInput.set(cleaned);
   }
 
   clearInput(): void {

@@ -1,6 +1,7 @@
 import {
   Component,
   computed,
+  DestroyRef,
   inject,
   signal,
   ChangeDetectionStrategy,
@@ -10,8 +11,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AlbumViewService } from '../../core/services/album-view.service';
 import { CollectionService } from '../../core/services/collection.service';
 import { StickerView } from '../../core/models/album.model';
-
-const ALBUM_ID = 'wc2026';
+import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
 
 @Component({
   selector: 'app-duplicates',
@@ -347,23 +347,49 @@ const ALBUM_ID = 'wc2026';
 export class DuplicatesComponent {
   private viewService = inject(AlbumViewService);
   private collectionService = inject(CollectionService);
+  private albumId = inject(CURRENT_ALBUM_ID);
 
-  duplicates = toSignal(this.viewService.getDuplicates(ALBUM_ID), {
+  duplicates = toSignal(this.viewService.getDuplicates(this.albumId), {
     initialValue: [] as StickerView[],
   });
 
   copyState = signal<'idle' | 'copied'>('idle');
+  busy = signal(false);
 
   totalDups = computed(() =>
     this.duplicates().reduce((sum, s) => sum + (s.count - 1), 0)
   );
 
-  inc(s: StickerView) {
-    this.collectionService.addDuplicate(ALBUM_ID, s.code, s.count);
+  async inc(s: StickerView) {
+    if (this.busy()) return;
+    this.busy.set(true);
+    try {
+      await this.collectionService.addDuplicate(this.albumId, s.code, s.count);
+    } catch (err) {
+      console.error('addDuplicate failed', err);
+    } finally {
+      this.busy.set(false);
+    }
   }
 
-  dec(s: StickerView) {
-    this.collectionService.removeOne(ALBUM_ID, s.code, s.count);
+  async dec(s: StickerView) {
+    if (this.busy()) return;
+    this.busy.set(true);
+    try {
+      await this.collectionService.removeOne(this.albumId, s.code, s.count);
+    } catch (err) {
+      console.error('removeOne failed', err);
+    } finally {
+      this.busy.set(false);
+    }
+  }
+
+  private copyResetTimer: ReturnType<typeof setTimeout> | null = null;
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => {
+      if (this.copyResetTimer !== null) clearTimeout(this.copyResetTimer);
+    });
   }
 
   copyList() {
@@ -372,7 +398,11 @@ export class DuplicatesComponent {
       .join(', ');
     navigator.clipboard.writeText(text).then(() => {
       this.copyState.set('copied');
-      setTimeout(() => this.copyState.set('idle'), 1800);
+      if (this.copyResetTimer !== null) clearTimeout(this.copyResetTimer);
+      this.copyResetTimer = setTimeout(() => {
+        this.copyState.set('idle');
+        this.copyResetTimer = null;
+      }, 1800);
     });
   }
 
