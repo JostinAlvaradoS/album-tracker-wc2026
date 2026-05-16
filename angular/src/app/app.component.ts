@@ -52,7 +52,7 @@ const NAV_ROUTES: NavRoute[] = [
                 <span class="brand__mark-num e26-display">26</span>
               </span>
               <span class="brand__copy">
-                <span class="e26-eyebrow brand__eyebrow">Línea 26</span>
+                <span class="e26-eyebrow brand__eyebrow">FWC 2026</span>
                 <span class="brand__title e26-display">{{ pageTitle() }}</span>
               </span>
             </a>

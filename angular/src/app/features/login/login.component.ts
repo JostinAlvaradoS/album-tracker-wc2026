@@ -18,16 +18,15 @@ import {
   imports: [NgIf],
   template: `
     <main class="auth">
-      <!-- Barra superior con marca y edición -->
+      <!-- Barra superior con marca -->
       <header class="auth__topbar">
         <div class="brand">
           <span class="brand__mark e26-display" aria-hidden="true">26</span>
           <div class="brand__text">
-            <span class="brand__line e26-code">LÍNEA 26</span>
+            <span class="brand__line e26-code">FWC 2026</span>
             <span class="brand__sub">Tracker de cromos</span>
           </div>
         </div>
-        <span class="auth__edition e26-code" aria-hidden="true">EDICIÓN · FWC 2026</span>
       </header>
 
       <div class="auth__split">
@@ -50,7 +49,7 @@ import {
 
             <p class="hero__lede">
               Pegados, repes, faltantes y progreso por selección.
-              Sin ruido visual, sin marcas oficiales, con números limpios.
+              Sin ruido visual, con números limpios.
             </p>
 
             <dl class="hero__stats">
@@ -140,12 +139,6 @@ import {
             </button>
 
             <p class="action__error" *ngIf="error()" role="alert">{{ error() }}</p>
-
-            <footer class="action__foot">
-              <span class="e26-eyebrow">Línea 26</span>
-              <span class="dot" aria-hidden="true">·</span>
-              <span>Identidad propia · Sin marcas FIFA</span>
-            </footer>
           </div>
         </section>
       </div>
@@ -202,11 +195,6 @@ import {
     .brand__sub {
       font-size: var(--e26-fs-xs);
       color: var(--e26-text-subtle);
-    }
-    .auth__edition {
-      font-size: var(--e26-fs-xs);
-      color: var(--e26-text-subtle);
-      letter-spacing: var(--e26-tracking-caps);
     }
 
     /* ===== SPLIT ===== */
@@ -499,16 +487,6 @@ import {
       border-radius: var(--e26-radius-sm);
       line-height: var(--e26-lh-snug);
     }
-
-    .action__foot {
-      display: flex;
-      align-items: center;
-      gap: var(--e26-space-2);
-      font-size: var(--e26-fs-xs);
-      color: var(--e26-text-subtle);
-      flex-wrap: wrap;
-    }
-    .action__foot .dot { opacity: .5; }
 
     /* ===== Responsive: tablet+ ===== */
     @media (min-width: 768px) {
