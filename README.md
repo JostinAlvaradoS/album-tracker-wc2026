@@ -173,6 +173,16 @@ angular/src/app/
 Más detalle de la estrategia de caching (IndexedDB persistente, shareReplay,
 0 reads antes de writes) en `CLAUDE.md`.
 
+### Decisiones arquitectónicas (ADRs)
+
+Las decisiones técnicas relevantes están documentadas en formato
+[MADR 3.0](https://adr.github.io/madr/) bajo [`docs/adr/`](docs/adr/):
+
+- [ADR-0001 — Estrategia de caching de Firestore](docs/adr/0001-firestore-caching-strategy.md)
+- [ADR-0002 — Un documento por cromo poseído](docs/adr/0002-single-doc-per-owned-sticker.md)
+- [ADR-0003 — Whitelist dual (cliente + reglas)](docs/adr/0003-whitelist-dual-client-rules.md)
+- [ADR-0004 — Stack: Firebase + Angular vs alternativas](docs/adr/0004-stack-firebase-angular.md)
+
 ## Contribuir
 
 PRs bienvenidos. Lee [CONTRIBUTING.md](CONTRIBUTING.md) antes de empezar.
