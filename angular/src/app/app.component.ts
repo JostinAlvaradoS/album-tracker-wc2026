@@ -473,8 +473,9 @@ export class AppComponent {
     this.theme.set(this.theme() === 'light' ? 'dark' : 'light');
   }
 
-  logout() {
-    this.auth.logout();
+  async logout() {
+    await this.auth.logout();
+    this.router.navigate(['/login']);
   }
 
   userLabel(u: { isAnonymous: boolean; displayName?: string | null; email?: string | null }): string {
