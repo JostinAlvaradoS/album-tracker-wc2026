@@ -465,7 +465,7 @@ export class AppComponent {
   constructor() {
     effect(() => {
       document.documentElement.setAttribute('data-theme', this.theme());
-      try { localStorage.setItem('e26-theme', this.theme()); } catch {}
+      try { localStorage.setItem('e26-theme', this.theme()); } catch { /* localStorage off / quota */ }
     });
   }
 
@@ -489,7 +489,7 @@ export class AppComponent {
     try {
       const stored = localStorage.getItem('e26-theme');
       if (stored === 'dark' || stored === 'light') return stored;
-    } catch {}
+    } catch { /* localStorage off */ }
     return 'light';
   }
 }

@@ -14,6 +14,6 @@ export const CURRENT_ALBUM_ID = new InjectionToken<string>('CURRENT_ALBUM_ID');
  * popula desde `.env` (`NG_APP_ALLOWED_EMAILS`). La fuente de verdad de
  * seguridad sigue siendo `firestore.rules` — esto es UX.
  */
-export const ALLOWED_EMAILS = new InjectionToken<ReadonlyArray<string>>(
+export const ALLOWED_EMAILS = new InjectionToken<readonly string[]>(
   'ALLOWED_EMAILS'
 );

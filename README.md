@@ -1,5 +1,10 @@
 # Copa Tracker — Álbum WC 2026
 
+[![CI](https://github.com/jostinalvarado/copa-tracker-wc2026/actions/workflows/ci.yml/badge.svg)](https://github.com/jostinalvarado/copa-tracker-wc2026/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Angular 18](https://img.shields.io/badge/angular-18-dd0031.svg)](https://angular.dev)
+[![Firebase](https://img.shields.io/badge/firebase-Firestore%20%2B%20Auth-ffa000.svg)](https://firebase.google.com)
+
 Aplicación web para llevar la cuenta de los cromos del álbum del Mundial 2026.
 Marca lo que ya tienes pegado, registra repetidos para intercambio y consulta
 estados de cromos en segundos durante un cambio.
@@ -109,6 +114,36 @@ cd angular
 npm start                         # http://localhost:4200
 ```
 
+### Scripts disponibles
+
+```bash
+npm start            # dev server con HMR
+npm run build        # build de producción
+npm run lint         # ESLint + angular-eslint
+npm test             # tests con Jest
+npm run test:watch   # tests en modo watch
+npm run test:ci      # tests con coverage (formato CI)
+```
+
+CI corre `lint + test + build` en cada push y pull request. Ver
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+
+### Cobertura de tests
+
+**116 tests · ~88% statements global** (corte vigente impuesto por
+`jest.config.js`):
+
+| Capa | Threshold | Estado |
+|---|---|---|
+| Global | 85% | ✓ |
+| `core/services/` (dominio) | 90% | ✓ |
+| `core/guards/` | 100% | ✓ |
+| `core/config/` | 100% | ✓ |
+
+Si una PR baja la cobertura de estos umbrales, CI rompe. Los archivos de
+bootstrap (`app.config.ts`, `app.routes.ts`, `main.ts`, `environment.ts`)
+están excluidos del cálculo — no tienen lógica testeable como unidad.
+
 ### 7. Deploy
 
 ```bash
@@ -146,6 +181,154 @@ users/{uid}/collections/{albumId}/items/{code}
 documentos vacíos al iniciar un álbum.
 
 ## Arquitectura
+
+> Los diagramas usan [Mermaid](https://mermaid.js.org/), que GitHub
+> renderiza de forma nativa. Si los ves como bloques de código, abrí
+> el README desde GitHub web (no desde un editor local sin plugin).
+
+### 1. Vista de sistema
+
+Qué corre en el navegador, qué en Firebase y por dónde se hablan.
+
+```mermaid
+flowchart LR
+    subgraph Browser["Navegador del usuario"]
+        UI["App Angular<br/>(SPA standalone)"]
+        Cache[("IndexedDB<br/>persistentLocalCache")]
+        UI <--> Cache
+    end
+
+    subgraph FB["Firebase plan Spark"]
+        Hosting["Firebase Hosting<br/>CDN estática"]
+        Auth["Firebase Auth<br/>provider Google"]
+        FS[("Firestore<br/>NoSQL + Watch API")]
+        Rules["firestore.rules<br/>isAllowlisted()"]
+        FS -. evalúa .-> Rules
+    end
+
+    Browser -. "GET / (bundle)" .-> Hosting
+    Hosting -. "JS / CSS / assets" .-> Browser
+    UI <-- "signInWithPopup" --> Auth
+    UI <-- "listeners + writes" --> FS
+```
+
+**Cómo leerlo:**
+
+- El **bundle Angular** se sirve estático desde Firebase Hosting.
+- La app abre **listeners reactivos** contra Firestore. La librería
+  guarda copia local de cada doc en **IndexedDB**, así un refresh o
+  cierre de pestaña no implica volver a descargar el catálogo (ver
+  [ADR-0001](docs/adr/0001-firestore-caching-strategy.md)).
+- Cada operación de Firestore se valida contra `firestore.rules`. La
+  función `isAllowlisted()` chequea el email del token (whitelist).
+- El login es client-side con popup de Google; el cliente verifica
+  además que el email esté en `ALLOWED_EMAILS` y hace `signOut` si no
+  (ver [ADR-0003](docs/adr/0003-whitelist-dual-client-rules.md)).
+
+### 2. Capas internas de la app Angular
+
+Cómo se organizan los módulos dentro de `angular/src/app/`.
+
+```mermaid
+flowchart TB
+    subgraph Features["features/  ·  capa de presentación"]
+        Login[login]
+        Album[album-view + sticker-cell]
+        Missing[missing-list]
+        Duplicates[duplicates]
+        Comparator[comparator]
+        Stats[stats]
+    end
+
+    subgraph Services["core/services/  ·  capa de aplicación"]
+        AuthS["auth.service.ts<br/>login + whitelist"]
+        ViewS["album-view.service.ts<br/>fachada catálogo + inventario"]
+        CatalogS["album-catalog.service.ts<br/>cache shareReplay"]
+        CollectionS["collection.service.ts<br/>writes atómicos"]
+    end
+
+    subgraph Domain["core/models/  ·  dominio"]
+        DomainTypes["album.model.ts<br/>(tipos puros)"]
+    end
+
+    subgraph Config["core/config/  ·  configuración"]
+        Tokens["app.tokens.ts<br/>CURRENT_ALBUM_ID<br/>ALLOWED_EMAILS"]
+    end
+
+    subgraph SDK["@angular/fire  ·  infraestructura"]
+        Firestore[Firestore SDK]
+        FbAuth[Auth SDK]
+    end
+
+    Album --> ViewS
+    Album --> CollectionS
+    Album --> CatalogS
+    Missing --> ViewS
+    Duplicates --> ViewS
+    Duplicates --> CollectionS
+    Comparator --> ViewS
+    Stats --> ViewS
+    Login --> AuthS
+
+    ViewS --> CatalogS
+    ViewS --> CollectionS
+    AuthS --> CatalogS
+    AuthS --> FbAuth
+    CatalogS --> Firestore
+    CollectionS --> Firestore
+    CollectionS --> FbAuth
+
+    Features -. usa .-> DomainTypes
+    Services -. usa .-> DomainTypes
+    Services -. usa .-> Tokens
+```
+
+**Reglas que se respetan:**
+
+- Los **componentes nunca tocan Firestore directo**: pasan por servicios.
+- `AlbumViewService` actúa como **fachada**: combina catálogo + inventario
+  reactivamente, los componentes leen una sola fuente.
+- Los **tipos del dominio** (`album.model.ts`) son puros — no dependen
+  de Firestore. Si mañana migráramos a otro backend, esta capa no se
+  toca.
+- Los **InjectionTokens** (`app.tokens.ts`) hacen configurable lo que
+  antes era magic string (`'wc2026'`) o lista hardcoded (whitelist).
+
+### 3. Flujo de un click ("marcar pegado" / "sumar repe")
+
+Por qué cada click siente que es instantáneo aunque exista un servidor.
+
+```mermaid
+sequenceDiagram
+    actor U as Usuario
+    participant C as Componente<br/>(album-view)
+    participant CS as CollectionService
+    participant Cache as IndexedDB<br/>(local)
+    participant FS as Firestore<br/>(servidor)
+
+    U->>C: click en un cromo
+    C->>CS: setStickerCount(albumId, code, newCount, prevCount)
+    Note over CS: batch transactional<br/>1) set/delete item<br/>2) increment stats
+    CS->>Cache: batch.commit() optimista
+    Cache-->>C: nuevo valor (UI actualiza)
+    par sync en background
+        Cache->>FS: write al servidor
+        FS-->>Cache: ACK + resume token
+    end
+```
+
+**Por qué importa este flujo:**
+
+- El **UI se actualiza con el primer frame** porque el batch se aplica
+  al cache local antes del round-trip. Sin esto, cada click tendría
+  300-800 ms de delay perceptible.
+- El caller pasa `prevCount` desde un listener que ya tiene el valor.
+  Esto elimina un `getDoc()` previo. Resultado:
+  **0 reads + 1 write por click** en vez de 2 reads + 1 write.
+- Si la red está caída, el write queda **encolado en IndexedDB** y se
+  manda al recuperar conexión. La app sigue usable offline.
+
+### 4. Estructura de carpetas
 
 ```
 angular/src/app/
