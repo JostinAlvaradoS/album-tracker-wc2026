@@ -1,9 +1,9 @@
 # Copa Tracker — Álbum WC 2026
 
 [![CI](https://github.com/JostinAlvaradoS/album-tracker-wc2026/actions/workflows/ci.yml/badge.svg)](https://github.com/JostinAlvaradoS/album-tracker-wc2026/actions/workflows/ci.yml)
-[![Coverage](https://img.shields.io/badge/coverage-88%25-success.svg)](#cobertura-de-tests)
+[![Coverage](https://img.shields.io/badge/coverage-94%25-success.svg)](#cobertura-de-tests)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.1.0-blue.svg)](CHANGELOG.md)
 [![Angular 18](https://img.shields.io/badge/angular-18-dd0031.svg)](https://angular.dev)
 [![Firebase](https://img.shields.io/badge/firebase-Firestore%20%2B%20Auth-ffa000.svg)](https://firebase.google.com)
 [![Code style: Conventional Commits](https://img.shields.io/badge/commits-conventional-fe5196.svg)](https://www.conventionalcommits.org)
