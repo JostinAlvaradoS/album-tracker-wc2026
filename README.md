@@ -33,7 +33,31 @@ estados de cromos en segundos durante un cambio.
 
 ## Capturas
 
-> _Pendiente — agregar GIFs/screenshots cuando estén disponibles._
+### Vista principal
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/f92253a9-0e2f-4b11-88b1-5729009b65d9" alt="Vista del álbum" width="100%" />
+</p>
+
+### Otras pantallas
+
+<table>
+<tr>
+<td width="33%" align="center"><img src="https://github.com/user-attachments/assets/d3e9e1f4-c163-435d-90b4-481489553ca9" alt="Pantalla 3" width="100%" /></td>
+<td width="33%" align="center"><img src="https://github.com/user-attachments/assets/ca9f66ab-cbe9-45c6-a33a-d63efd807461" alt="Pantalla 2" width="100%" /></td>
+<td width="33%" align="center"><img src="https://github.com/user-attachments/assets/cc735cfd-9780-4b30-84da-583f0e8400a7" alt="Pantalla 4" width="100%" /></td>
+</tr>
+</table>
+
+### Estados de un cromo
+
+<table>
+<tr>
+<td width="33%" align="center"><img src="https://github.com/user-attachments/assets/c8b0bb6a-5757-43d8-8322-866f31f45618" alt="Cromo pegado" width="100%" /><br/><sub><b>Pegado</b> · ya lo tienes en el álbum</sub></td>
+<td width="33%" align="center"><img src="https://github.com/user-attachments/assets/cce12de7-bd95-41d8-8e22-64bb80383cd2" alt="Cromo faltante" width="100%" /><br/><sub><b>Falta</b> · aún no aparece</sub></td>
+<td width="33%" align="center"><img src="https://github.com/user-attachments/assets/0a4bc0d4-845e-48cc-a02e-7f2c1631b260" alt="Cromo repetido" width="100%" /><br/><sub><b>Repe</b> · disponible para cambio</sub></td>
+</tr>
+</table>
 
 ## Setup
 
