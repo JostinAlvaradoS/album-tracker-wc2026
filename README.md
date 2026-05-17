@@ -43,8 +43,8 @@ estados de cromos en segundos durante un cambio.
 
 <table>
 <tr>
-<td width="33%" align="center"><img src="https://github.com/user-attachments/assets/ca9f66ab-cbe9-45c6-a33a-d63efd807461" alt="Pantalla 2" width="100%" /></td>
 <td width="33%" align="center"><img src="https://github.com/user-attachments/assets/d3e9e1f4-c163-435d-90b4-481489553ca9" alt="Pantalla 3" width="100%" /></td>
+<td width="33%" align="center"><img src="https://github.com/user-attachments/assets/ca9f66ab-cbe9-45c6-a33a-d63efd807461" alt="Pantalla 2" width="100%" /></td>
 <td width="33%" align="center"><img src="https://github.com/user-attachments/assets/cc735cfd-9780-4b30-84da-583f0e8400a7" alt="Pantalla 4" width="100%" /></td>
 </tr>
 </table>
