@@ -108,12 +108,12 @@ Cada click pasa de **2 reads + 1 write** a **0 reads + 1 write**. Más important
 
 ## Reglas para futuras features
 
-1. **Nunca hagas `getDoc` antes de un write si ya hay un listener activo con ese dato.** Pasá el valor por parámetro.
-2. **Para datos estáticos del catálogo**, usá `AlbumCatalogService` (ya cacheado). No leas `albums/...` directamente desde un componente.
-3. **Para datos derivados** (progreso, faltantes, repes), usá `AlbumViewService` que combina catálogo + inventario reactivamente. No dupliques esa lógica en componentes.
-4. **Las stats denormalizadas** en `users/{uid}/collections/{albumId}` se actualizan vía `increment()` dentro del batch que muta el item. No las recalcules del cliente y las sobreescribas — perdés atomicidad.
-5. **Para una pantalla nueva que necesita una vista distinta del catálogo**, agregá un método derivado en `AlbumViewService`, no leas Firestore directo.
-6. **Si necesitás un dato puntual sin reactividad** (ej: chequeo de existencia previo a un write), usá `getDocFromCache` con fallback a `getDocFromServer`. Nunca uses el `getDoc()` legacy salvo que sepas que el dato cambia muy seguido en otro device.
+1. **Nunca hagas `getDoc` antes de un write si ya hay un listener activo con ese dato.** Pasa el valor por parámetro.
+2. **Para datos estáticos del catálogo**, usa `AlbumCatalogService` (ya cacheado). No leas `albums/...` directamente desde un componente.
+3. **Para datos derivados** (progreso, faltantes, repes), usa `AlbumViewService` que combina catálogo + inventario reactivamente. No dupliques esa lógica en componentes.
+4. **Las stats denormalizadas** en `users/{uid}/collections/{albumId}` se actualizan vía `increment()` dentro del batch que muta el item. No las recalcules del cliente y las sobreescribas — pierdes atomicidad.
+5. **Para una pantalla nueva que necesita una vista distinta del catálogo**, agrega un método derivado en `AlbumViewService`, no leas Firestore directo.
+6. **Si necesitas un dato puntual sin reactividad** (ej: chequeo de existencia previo a un write), usa `getDocFromCache` con fallback a `getDocFromServer`. Nunca uses el `getDoc()` legacy salvo que sepas que el dato cambia muy seguido en otro device.
 
 ## Comandos
 

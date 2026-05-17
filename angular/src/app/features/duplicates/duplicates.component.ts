@@ -10,14 +10,15 @@ import { NgIf, NgFor } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AlbumViewService } from '../../core/services/album-view.service';
 import { CollectionService } from '../../core/services/collection.service';
-import { StickerView } from '../../core/models/album.model';
+import { SectionView, StickerView } from '../../core/models/album.model';
 import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
+import { SectionFilterComponent } from '../shared/section-filter/section-filter.component';
 
 @Component({
   selector: 'app-duplicates',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIf, NgFor],
+  imports: [NgIf, NgFor, SectionFilterComponent],
   template: `
     <div class="page">
 
@@ -26,51 +27,63 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
         <div class="hero__main">
           <span class="e26-eyebrow">Para intercambio</span>
           <h1 class="hero__title e26-display">
-            <span class="hero__num">{{ totalDups() }}</span>
-            <span class="hero__suffix">repe{{ totalDups() === 1 ? '' : 's' }}</span>
+            <span class="hero__num">{{ visibleDupsTotal() }}</span>
+            <span class="hero__suffix">repe{{ visibleDupsTotal() === 1 ? '' : 's' }}</span>
           </h1>
           <p class="hero__text">
-            <span class="hero__count">{{ duplicates().length }}</span>
-            cromos distintos repetidos. Comparte la lista o ajusta las
-            cantidades con
+            <span class="hero__count">{{ visibleDuplicates().length }}</span>
+            cromos distintos repetidos. Ajusta cantidades con
             <span class="e26-code">+</span> / <span class="e26-code">−</span>.
+            <span *ngIf="sectionFilter()" class="hero__filter-note">
+              · Filtro activo, copia solo lo visible.
+            </span>
           </p>
         </div>
 
         <button class="copy-btn"
                 type="button"
                 (click)="copyList()"
-                [disabled]="duplicates().length === 0">
+                [disabled]="visibleDuplicates().length === 0">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none"
                stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"
                aria-hidden="true">
             <rect x="9" y="9" width="13" height="13" rx="2"></rect>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
           </svg>
-          <span>{{ copyState() === 'idle' ? 'Copiar lista' : 'Copiado ✓' }}</span>
+          <span>{{ copyButtonLabel() }}</span>
         </button>
       </section>
 
+      <!-- Filtro compartido -->
+      <app-section-filter
+        *ngIf="sectionsWithDupes().length > 0"
+        [sections]="sectionsWithDupes()"
+        [selected]="sectionFilter()"
+        mode="dupe-count"
+        (selectedChange)="sectionFilter.set($event)" />
+
       <!-- Tabla -->
-      <section class="list" *ngIf="duplicates().length > 0; else emptyTpl">
+      <section class="list" *ngIf="visibleDuplicates().length > 0; else emptyTpl">
         <header class="list__head">
           <span class="col col--code">Código</span>
           <span class="col col--name">Cromo</span>
-          <span class="col col--dups">Repes</span>
-          <span class="col col--act">Ajustar</span>
+          <span class="col col--act">Para cambio</span>
         </header>
 
         <article class="row"
-                 *ngFor="let s of duplicates(); trackBy: track">
+                 *ngFor="let s of visibleDuplicates(); trackBy: track">
           <span class="col col--code e26-code">{{ s.code }}</span>
 
           <span class="col col--name">
             <span class="row__primary">{{ s.label }}</span>
             <span class="row__section">{{ s.sectionName }}</span>
-          </span>
-
-          <span class="col col--dups">
-            <span class="dup-badge e26-code">×{{ s.count - 1 }}</span>
+            <span class="row__breakdown" aria-label="Desglose">
+              <span class="chip-mini chip-mini--owned">1 pegado</span>
+              <span class="chip-mini chip-mini--trade">
+                <strong>{{ s.count - 1 }}</strong>
+                para cambio
+              </span>
+            </span>
           </span>
 
           <span class="col col--act actions">
@@ -83,7 +96,10 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
                 <path d="M3 8h10"/>
               </svg>
             </button>
-            <span class="step__count e26-code">{{ s.count }}</span>
+            <span class="step__count e26-code"
+                  [attr.aria-label]="(s.count - 1) + ' repes disponibles'">
+              ×{{ s.count - 1 }}
+            </span>
             <button type="button"
                     class="step step--plus"
                     (click)="inc(s)"
@@ -100,10 +116,13 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
       <ng-template #emptyTpl>
         <div class="empty">
           <span class="empty__num e26-display">0</span>
-          <p class="empty__title e26-display">Sin repes</p>
+          <p class="empty__title e26-display">
+            {{ sectionFilter() ? 'Sin repes aquí' : 'Sin repes' }}
+          </p>
           <p class="empty__text">
-            No tienes cromos repetidos. Cuando te toque uno duplicado,
-            aparecerá aquí listo para intercambiar.
+            {{ sectionFilter()
+              ? 'Esta sección no tiene repes en este momento. Quita el filtro para ver el resto.'
+              : 'No tienes cromos repetidos. Cuando te toque uno duplicado, aparecerá aquí listo para intercambiar.' }}
           </p>
         </div>
       </ng-template>
@@ -179,6 +198,7 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
       max-width: 52ch;
     }
     .hero__count { color: var(--e26-text); font-weight: 700; }
+    .hero__filter-note { color: var(--e26-info); font-weight: 600; }
     .hero__text .e26-code {
       background: var(--e26-surface-2);
       padding: 1px 5px;
@@ -218,7 +238,7 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
     }
     .list__head {
       display: none;
-      grid-template-columns: 90px 1fr 80px 140px;
+      grid-template-columns: 90px 1fr 160px;
       gap: var(--e26-space-3);
       padding: var(--e26-space-3) var(--e26-space-4);
       background: var(--e26-surface-2);
@@ -229,6 +249,7 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
       color: var(--e26-text-subtle);
       font-weight: 600;
     }
+    .list__head .col--act { text-align: right; }
     @media (min-width: 768px) {
       .list__head { display: grid; }
     }
@@ -246,7 +267,7 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
 
     @media (min-width: 768px) {
       .row {
-        grid-template-columns: 90px 1fr 80px 140px;
+        grid-template-columns: 90px 1fr 160px;
         gap: var(--e26-space-3);
       }
     }
@@ -259,30 +280,50 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
     .col--name {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
       min-width: 0;
     }
     .row__primary {
       font-size: var(--e26-fs-sm);
       color: var(--e26-text);
       font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .row__section {
       font-size: var(--e26-fs-xs);
       color: var(--e26-text-subtle);
     }
-    .col--dups { display: none; }
-    @media (min-width: 768px) {
-      .col--dups { display: block; }
+
+    .row__breakdown {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--e26-space-2);
+      margin-top: 2px;
     }
-    .dup-badge {
-      display: inline-block;
+    .chip-mini {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       padding: 2px 8px;
+      border-radius: var(--e26-radius-pill);
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+    .chip-mini--owned {
+      background: var(--e26-primary-soft);
+      color: var(--e26-primary);
+    }
+    .chip-mini--trade {
       background: var(--e26-accent-soft);
       color: var(--e26-accent);
-      border-radius: var(--e26-radius-pill);
-      font-size: var(--e26-fs-xs);
+    }
+    .chip-mini strong {
       font-weight: 700;
+      font-variant-numeric: tabular-nums;
     }
 
     .actions {
@@ -292,6 +333,7 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
       background: var(--e26-surface-2);
       border-radius: var(--e26-radius-pill);
       padding: 3px;
+      justify-self: end;
     }
     .step {
       width: 30px;
@@ -310,11 +352,12 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
     .step:hover { background: var(--e26-text); color: var(--e26-text-inverse); }
     .step:active { transform: scale(.94); }
     .step__count {
-      min-width: 22px;
+      min-width: 32px;
       text-align: center;
       font-size: var(--e26-fs-sm);
       font-weight: 700;
-      color: var(--e26-text);
+      color: var(--e26-accent);
+      font-variant-numeric: tabular-nums;
     }
 
     /* ===== EMPTY ===== */
@@ -349,16 +392,50 @@ export class DuplicatesComponent {
   private collectionService = inject(CollectionService);
   private albumId = inject(CURRENT_ALBUM_ID);
 
-  duplicates = toSignal(this.viewService.getDuplicates(this.albumId), {
-    initialValue: [] as StickerView[],
+  sections = toSignal(this.viewService.getAlbumView(this.albumId), {
+    initialValue: [] as SectionView[],
   });
 
+  sectionFilter = signal<string>('');
   copyState = signal<'idle' | 'copied'>('idle');
   busy = signal(false);
 
+  /** Todos los cromos con repes, sin filtro. */
+  duplicates = computed<StickerView[]>(() =>
+    this.sections().flatMap((s) =>
+      s.stickers.filter((x) => x.status === 'duplicate')
+    )
+  );
+
+  /** Secciones que tienen al menos un cromo con repes — para el filtro. */
+  sectionsWithDupes = computed(() =>
+    this.sections().filter((s) =>
+      s.stickers.some((x) => x.status === 'duplicate')
+    )
+  );
+
+  /** Lista visible según el filtro de sección. */
+  visibleDuplicates = computed<StickerView[]>(() => {
+    const filter = this.sectionFilter();
+    if (!filter) return this.duplicates();
+    return this.duplicates().filter((s) => s.sectionId === filter);
+  });
+
+  /** Total de repes (count-1) sumados en lo visible. */
+  visibleDupsTotal = computed(() =>
+    this.visibleDuplicates().reduce((sum, s) => sum + (s.count - 1), 0)
+  );
+
+  /** Total global de repes (sin filtro). Útil para tests / contadores. */
   totalDups = computed(() =>
     this.duplicates().reduce((sum, s) => sum + (s.count - 1), 0)
   );
+
+  /** Texto del botón de copiar: cambia según haya filtro activo y estado. */
+  copyButtonLabel = computed(() => {
+    if (this.copyState() === 'copied') return 'Copiado ✓';
+    return this.sectionFilter() ? 'Copiar sección' : 'Copiar lista completa';
+  });
 
   async inc(s: StickerView) {
     if (this.busy()) return;
@@ -393,8 +470,8 @@ export class DuplicatesComponent {
   }
 
   copyList() {
-    const text = this.duplicates()
-      .map(s => `${s.code} ×${s.count - 1}`)
+    const text = this.visibleDuplicates()
+      .map((s) => `${s.code} ×${s.count - 1}`)
       .join(', ');
     navigator.clipboard.writeText(text).then(() => {
       this.copyState.set('copied');

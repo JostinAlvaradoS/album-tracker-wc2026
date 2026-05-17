@@ -105,17 +105,6 @@ describe('AlbumViewComponent', () => {
       expect(component.dupeCount()).toBe(1);
     });
 
-    it('teamSections vs specialSections filtra por type', () => {
-      const sections = [
-        section('arg', 'team', []),
-        section('fwc_intro', 'intro', []),
-        section('cocacola', 'special', []),
-      ];
-      const { component } = setup({ sections: of(sections) });
-      expect(component.teamSections()).toHaveLength(1);
-      expect(component.specialSections()).toHaveLength(2);
-    });
-
     it('sectionPct devuelve 0 cuando no hay stickers', () => {
       const { component } = setup({ sections: of([]) });
       expect(
@@ -149,26 +138,12 @@ describe('AlbumViewComponent', () => {
       expect(visible[0].stickers[0].code).toBe('A1');
     });
 
-    it('setSectionFilter toggles cuando se llama dos veces con el mismo id', () => {
+    it('sectionFilter signal escribe directo el id seleccionado', () => {
       const { component } = setup({});
-      component.setSectionFilter('arg');
+      component.sectionFilter.set('arg');
       expect(component.sectionFilter()).toBe('arg');
-      component.setSectionFilter('arg');
+      component.sectionFilter.set('');
       expect(component.sectionFilter()).toBe('');
-    });
-
-    it('clearSectionFilter resetea el filtro', () => {
-      const { component } = setup({});
-      component.setSectionFilter('arg');
-      component.clearSectionFilter();
-      expect(component.sectionFilter()).toBe('');
-    });
-
-    it('onSectionChange lee el value del select', () => {
-      const { component } = setup({});
-      const ev = { target: { value: 'mex' } } as unknown as Event;
-      component.onSectionChange(ev);
-      expect(component.sectionFilter()).toBe('mex');
     });
 
     it('filtro missing oculta secciones que quedaron vacías', () => {

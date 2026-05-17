@@ -9,8 +9,9 @@ import {
 import { NgIf, NgFor } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AlbumViewService } from '../../core/services/album-view.service';
-import { StickerView } from '../../core/models/album.model';
+import { SectionView, StickerView } from '../../core/models/album.model';
 import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
+import { SectionFilterComponent } from '../shared/section-filter/section-filter.component';
 
 interface MissingGroup {
   section: string;
@@ -22,7 +23,7 @@ interface MissingGroup {
   selector: 'app-missing-list',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIf, NgFor],
+  imports: [NgIf, NgFor, SectionFilterComponent],
   template: `
     <div class="page">
 
@@ -31,28 +32,41 @@ interface MissingGroup {
         <div class="hero__main">
           <span class="e26-eyebrow">Lista de faltas</span>
           <h1 class="hero__title e26-display">
-            <span class="hero__num e26-display">{{ missing().length }}</span>
-            <span class="hero__suffix">cromos pendientes</span>
+            <span class="hero__num e26-display">{{ visibleCount() }}</span>
+            <span class="hero__suffix">
+              {{ sectionFilter() ? 'cromos en esta sección' : 'cromos pendientes' }}
+            </span>
           </h1>
           <p class="hero__text">
             Comparte esta lista con quien intercambies.
             Cada código corresponde a un slot del álbum.
+            <span *ngIf="sectionFilter()" class="hero__filter-note">
+              · Filtro activo, copia solo lo visible.
+            </span>
           </p>
         </div>
 
         <button class="copy-btn"
                 type="button"
                 (click)="copyList()"
-                [disabled]="missing().length === 0">
+                [disabled]="visibleCount() === 0">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none"
                stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"
                aria-hidden="true">
             <rect x="9" y="9" width="13" height="13" rx="2"></rect>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
           </svg>
-          <span>{{ copyState() === 'idle' ? 'Copiar lista' : 'Copiado ✓' }}</span>
+          <span>{{ copyButtonLabel() }}</span>
         </button>
       </section>
+
+      <!-- Filtro compartido -->
+      <app-section-filter
+        *ngIf="sectionsWithMissing().length > 0"
+        [sections]="sectionsWithMissing()"
+        [selected]="sectionFilter()"
+        mode="missing-count"
+        (selectedChange)="sectionFilter.set($event)" />
 
       <!-- Grupos -->
       <section class="groups" *ngIf="grouped().length > 0; else emptyTpl">
@@ -77,10 +91,13 @@ interface MissingGroup {
       <ng-template #emptyTpl>
         <div class="empty">
           <span class="e26-display empty__num">∎</span>
-          <p class="empty__title e26-display">Álbum completo</p>
+          <p class="empty__title e26-display">
+            {{ sectionFilter() ? 'Sin faltantes aquí' : 'Álbum completo' }}
+          </p>
           <p class="empty__text">
-            No te falta ningún cromo. Si te toca alguna repe,
-            la verás en <strong>Mis repes</strong>.
+            {{ sectionFilter()
+              ? 'Esta sección ya está completa. Quita el filtro para ver el resto.'
+              : 'No te falta ningún cromo. Si te toca alguna repe, la verás en Mis repes.' }}
           </p>
         </div>
       </ng-template>
@@ -138,6 +155,7 @@ interface MissingGroup {
       font-size: var(--e26-fs-sm);
       max-width: 52ch;
     }
+    .hero__filter-note { color: var(--e26-info); font-weight: 600; }
 
     .copy-btn {
       display: inline-flex;
@@ -257,27 +275,50 @@ export class MissingListComponent {
   private viewService = inject(AlbumViewService);
   private albumId = inject(CURRENT_ALBUM_ID);
 
-  missing = toSignal(this.viewService.getMissing(this.albumId), {
-    initialValue: [] as StickerView[],
+  sections = toSignal(this.viewService.getAlbumView(this.albumId), {
+    initialValue: [] as SectionView[],
   });
 
+  sectionFilter = signal<string>('');
   copyState = signal<'idle' | 'copied'>('idle');
 
+  /** Secciones que tienen al menos un cromo faltante — para el filtro. */
+  sectionsWithMissing = computed(() =>
+    this.sections().filter((s) =>
+      s.stickers.some((x) => x.status === 'missing')
+    )
+  );
+
+  /** Grupos filtrados por la sección activa. */
   grouped = computed<MissingGroup[]>(() => {
-    const bySection = new Map<string, StickerView[]>();
-    for (const s of this.missing()) {
-      const arr = bySection.get(s.sectionName) ?? [];
-      arr.push(s);
-      bySection.set(s.sectionName, arr);
+    const filter = this.sectionFilter();
+    const base = filter
+      ? this.sections().filter((s) => s.id === filter)
+      : this.sections();
+    const out: MissingGroup[] = [];
+    for (const sec of base) {
+      const items = sec.stickers
+        .filter((x) => x.status === 'missing')
+        .slice()
+        .sort((a, b) => a.number - b.number);
+      if (items.length === 0) continue;
+      out.push({
+        section: sec.name,
+        items,
+        codes: items.map((i) => i.code).join(', '),
+      });
     }
-    return [...bySection.entries()].map(([section, items]) => {
-      const sorted = items.slice().sort((a, b) => a.number - b.number);
-      return {
-        section,
-        items: sorted,
-        codes: sorted.map(i => i.code).join(', '),
-      };
-    });
+    return out;
+  });
+
+  visibleCount = computed(() =>
+    this.grouped().reduce((sum, g) => sum + g.items.length, 0)
+  );
+
+  /** Texto del botón de copiar: cambia según haya filtro activo y estado. */
+  copyButtonLabel = computed(() => {
+    if (this.copyState() === 'copied') return 'Copiado ✓';
+    return this.sectionFilter() ? 'Copiar sección' : 'Copiar lista completa';
   });
 
   private copyResetTimer: ReturnType<typeof setTimeout> | null = null;
@@ -290,7 +331,7 @@ export class MissingListComponent {
 
   copyList() {
     const text = this.grouped()
-      .map(g => `${g.section}: ${g.codes}`)
+      .map((g) => `${g.section}: ${g.codes}`)
       .join('\n');
     navigator.clipboard.writeText(text).then(() => {
       this.copyState.set('copied');

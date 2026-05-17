@@ -109,10 +109,10 @@ npm run test:ci      # con coverage (igual que en CI)
 
 Cobertura inicial: helpers presentacionales del `StickerCellComponent`,
 servicio de autenticación (whitelist) y el `AlbumViewService` (combinación
-catálogo + inventario). Si agregas lógica nueva en servicios, agregá tests.
+catálogo + inventario). Si agregas lógica nueva en servicios, agrega tests.
 
 Para mockear Firestore en tests de servicios, inyectá un mock parcial via
-`TestBed.configureTestingModule` — mirá `auth.service.spec.ts` y
+`TestBed.configureTestingModule` — mira `auth.service.spec.ts` y
 `album-view.service.spec.ts` como referencia.
 
 ## Reportar vulnerabilidades

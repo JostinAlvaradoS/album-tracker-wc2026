@@ -58,17 +58,52 @@ nunca confiar en ella para autorización.
 
 ## Forks
 
-Si forkeaste este proyecto y vas a deployarlo:
+Si forkeaste este proyecto y vas a deployarlo, el setup mínimo de
+seguridad se hace **todo desde Firebase Console**, sin necesidad de
+entrar a Google Cloud Console ni configurar IAM. Tres pasos:
 
-1. **Configurá tu propia whitelist** (`NG_APP_ALLOWED_EMAILS` y
-   `firestore.rules`). Si dejás todo abierto, cualquier cuenta de Google
-   puede consumir tu cuota.
-2. **Nunca commitees** `serviceAccountKey.json` ni `.env` — ya están en
-   `.gitignore`, pero verificá antes del primer push.
-3. **Revisá `firestore.rules`** antes de cada deploy. Es la única barrera
-   real.
-4. Considerá activar **Firebase App Check** si tu fork tiene más usuarios
-   que un puñado de amigos.
+### Setup mínimo (5 minutos, todo en Firebase Console)
+
+1. **Configurá tu whitelist** en dos lugares (mantenelos sincronizados):
+   - `angular/.env` → `NG_APP_ALLOWED_EMAILS=tu@gmail.com,amigo@gmail.com`
+   - `firestore.rules` → la lista de emails dentro de `isAllowlisted()`
+
+2. **Deployea las reglas** antes de exponer la app:
+
+       firebase deploy --only firestore:rules
+
+   Esta es la **única barrera real**. Sin esto, cualquiera podría
+   leer/escribir datos.
+
+3. **Higienizá Firebase Console** (1 click cada uno):
+   - **Authentication → Sign-in method** → habilitá solo Google,
+     deshabilitá Anonymous si está activo.
+   - **Authentication → Settings → Authorized domains** → confirmá
+     que solo estén `localhost`, `<proyecto>.web.app`,
+     `<proyecto>.firebaseapp.com`. Quitá cualquier dominio extra.
+
+### Higiene del repo
+
+- **Nunca commitees** `serviceAccountKey.json` ni `.env` — ya están en
+  `.gitignore`, pero verifica antes del primer push.
+- **Revisá `firestore.rules`** antes de cada deploy. Es lo único que
+  separa tu Firestore de un acceso externo.
+
+### Hardening opcional (solo si quieres ir más allá)
+
+Estos pasos requieren entrar a Google Cloud Console y entender un poco
+más de IAM. **No son necesarios** para que la app sea segura, pero
+agregan capas extra para escenarios específicos:
+
+- **HTTP referrer restrictions** sobre la API key (GCP → Credentials).
+  Útil si llegás a usar Cloud Functions, Cloud Storage u otros servicios
+  fuera de Auth + Firestore.
+- **Firebase App Check** (Firebase Console, requiere configurar
+  reCAPTCHA en GCP). Útil si tu fork tiene más usuarios que un puñado
+  de amigos y quieres verificar que los requests vienen de tu app real.
+
+Si solo usas Auth + Firestore + Hosting (el stack default), Firebase
+Console solo te alcanza.
 
 ## Histórico
 
