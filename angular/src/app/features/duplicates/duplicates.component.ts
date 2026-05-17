@@ -56,8 +56,7 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
         <header class="list__head">
           <span class="col col--code">Código</span>
           <span class="col col--name">Cromo</span>
-          <span class="col col--dups">Repes</span>
-          <span class="col col--act">Ajustar</span>
+          <span class="col col--act">Para cambio</span>
         </header>
 
         <article class="row"
@@ -67,10 +66,13 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
           <span class="col col--name">
             <span class="row__primary">{{ s.label }}</span>
             <span class="row__section">{{ s.sectionName }}</span>
-          </span>
-
-          <span class="col col--dups">
-            <span class="dup-badge e26-code">×{{ s.count - 1 }}</span>
+            <span class="row__breakdown" aria-label="Desglose">
+              <span class="chip-mini chip-mini--owned">1 pegado</span>
+              <span class="chip-mini chip-mini--trade">
+                <strong>{{ s.count - 1 }}</strong>
+                para cambio
+              </span>
+            </span>
           </span>
 
           <span class="col col--act actions">
@@ -83,7 +85,10 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
                 <path d="M3 8h10"/>
               </svg>
             </button>
-            <span class="step__count e26-code">{{ s.count }}</span>
+            <span class="step__count e26-code"
+                  [attr.aria-label]="(s.count - 1) + ' repes disponibles'">
+              ×{{ s.count - 1 }}
+            </span>
             <button type="button"
                     class="step step--plus"
                     (click)="inc(s)"
@@ -218,7 +223,7 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
     }
     .list__head {
       display: none;
-      grid-template-columns: 90px 1fr 80px 140px;
+      grid-template-columns: 90px 1fr 160px;
       gap: var(--e26-space-3);
       padding: var(--e26-space-3) var(--e26-space-4);
       background: var(--e26-surface-2);
@@ -229,6 +234,7 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
       color: var(--e26-text-subtle);
       font-weight: 600;
     }
+    .list__head .col--act { text-align: right; }
     @media (min-width: 768px) {
       .list__head { display: grid; }
     }
@@ -246,7 +252,7 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
 
     @media (min-width: 768px) {
       .row {
-        grid-template-columns: 90px 1fr 80px 140px;
+        grid-template-columns: 90px 1fr 160px;
         gap: var(--e26-space-3);
       }
     }
@@ -259,30 +265,50 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
     .col--name {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: 4px;
       min-width: 0;
     }
     .row__primary {
       font-size: var(--e26-fs-sm);
       color: var(--e26-text);
       font-weight: 600;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .row__section {
       font-size: var(--e26-fs-xs);
       color: var(--e26-text-subtle);
     }
-    .col--dups { display: none; }
-    @media (min-width: 768px) {
-      .col--dups { display: block; }
+
+    .row__breakdown {
+      display: flex;
+      flex-wrap: wrap;
+      gap: var(--e26-space-2);
+      margin-top: 2px;
     }
-    .dup-badge {
-      display: inline-block;
+    .chip-mini {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
       padding: 2px 8px;
+      border-radius: var(--e26-radius-pill);
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.4;
+      white-space: nowrap;
+    }
+    .chip-mini--owned {
+      background: var(--e26-primary-soft);
+      color: var(--e26-primary);
+    }
+    .chip-mini--trade {
       background: var(--e26-accent-soft);
       color: var(--e26-accent);
-      border-radius: var(--e26-radius-pill);
-      font-size: var(--e26-fs-xs);
+    }
+    .chip-mini strong {
       font-weight: 700;
+      font-variant-numeric: tabular-nums;
     }
 
     .actions {
@@ -310,11 +336,12 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
     .step:hover { background: var(--e26-text); color: var(--e26-text-inverse); }
     .step:active { transform: scale(.94); }
     .step__count {
-      min-width: 22px;
+      min-width: 32px;
       text-align: center;
       font-size: var(--e26-fs-sm);
       font-weight: 700;
-      color: var(--e26-text);
+      color: var(--e26-accent);
+      font-variant-numeric: tabular-nums;
     }
 
     /* ===== EMPTY ===== */
