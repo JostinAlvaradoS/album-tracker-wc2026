@@ -1,5 +1,10 @@
 # Copa Tracker — Álbum WC 2026
 
+[![CI](https://github.com/jostinalvarado/copa-tracker-wc2026/actions/workflows/ci.yml/badge.svg)](https://github.com/jostinalvarado/copa-tracker-wc2026/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Angular 18](https://img.shields.io/badge/angular-18-dd0031.svg)](https://angular.dev)
+[![Firebase](https://img.shields.io/badge/firebase-Firestore%20%2B%20Auth-ffa000.svg)](https://firebase.google.com)
+
 Aplicación web para llevar la cuenta de los cromos del álbum del Mundial 2026.
 Marca lo que ya tienes pegado, registra repetidos para intercambio y consulta
 estados de cromos en segundos durante un cambio.
@@ -108,6 +113,36 @@ para que solo valide `request.auth != null`.
 cd angular
 npm start                         # http://localhost:4200
 ```
+
+### Scripts disponibles
+
+```bash
+npm start            # dev server con HMR
+npm run build        # build de producción
+npm run lint         # ESLint + angular-eslint
+npm test             # tests con Jest
+npm run test:watch   # tests en modo watch
+npm run test:ci      # tests con coverage (formato CI)
+```
+
+CI corre `lint + test + build` en cada push y pull request. Ver
+[`.github/workflows/ci.yml`](.github/workflows/ci.yml).
+
+### Cobertura de tests
+
+**116 tests · ~88% statements global** (corte vigente impuesto por
+`jest.config.js`):
+
+| Capa | Threshold | Estado |
+|---|---|---|
+| Global | 85% | ✓ |
+| `core/services/` (dominio) | 90% | ✓ |
+| `core/guards/` | 100% | ✓ |
+| `core/config/` | 100% | ✓ |
+
+Si una PR baja la cobertura de estos umbrales, CI rompe. Los archivos de
+bootstrap (`app.config.ts`, `app.routes.ts`, `main.ts`, `environment.ts`)
+están excluidos del cálculo — no tienen lógica testeable como unidad.
 
 ### 7. Deploy
 

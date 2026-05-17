@@ -86,19 +86,34 @@ Ejemplos:
 
 ### Checklist antes de pedir review
 
-- [ ] El build pasa sin warnings nuevos.
-- [ ] El type-check pasa.
+- [ ] `npm run lint` pasa sin errores.
+- [ ] `npm test` pasa.
+- [ ] `npm run build` pasa sin warnings nuevos.
 - [ ] Probaste el flujo en `npm start` (login, álbum, faltas, repes,
       comparador).
+- [ ] Si agregaste lógica de servicios, sumaste su test.
 - [ ] No hay strings hardcoded que deberían ser tokens.
 - [ ] No agregaste libs nuevas sin discutirlo en el issue.
 - [ ] El copy nuevo está en español neutro y sin marcas oficiales.
 
 ## Tests
 
-El proyecto no tiene tests automatizados todavía (es un tracker personal).
-Si querés sumar, empezá por los servicios de `core/services/` — son los más
-fáciles de testear porque la lógica de Firestore está encapsulada.
+El proyecto usa **Jest** con `jest-preset-angular`. Los tests viven al
+lado del código que cubren (`*.spec.ts`).
+
+```bash
+npm test             # corre todos los tests
+npm run test:watch   # modo watch
+npm run test:ci      # con coverage (igual que en CI)
+```
+
+Cobertura inicial: helpers presentacionales del `StickerCellComponent`,
+servicio de autenticación (whitelist) y el `AlbumViewService` (combinación
+catálogo + inventario). Si agregas lógica nueva en servicios, agregá tests.
+
+Para mockear Firestore en tests de servicios, inyectá un mock parcial via
+`TestBed.configureTestingModule` — mirá `auth.service.spec.ts` y
+`album-view.service.spec.ts` como referencia.
 
 ## Reportar vulnerabilidades
 

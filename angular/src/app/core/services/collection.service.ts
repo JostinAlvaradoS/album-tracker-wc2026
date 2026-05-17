@@ -13,7 +13,7 @@ import {
   writeBatch,
 } from '@angular/fire/firestore';
 import { Auth } from '@angular/fire/auth';
-import { Observable, of, switchMap } from 'rxjs';
+import { Observable } from 'rxjs';
 import {
   CollectionItem,
   CollectionStats,
