@@ -1,9 +1,12 @@
 # Copa Tracker — Álbum WC 2026
 
-[![CI](https://github.com/jostinalvarado/copa-tracker-wc2026/actions/workflows/ci.yml/badge.svg)](https://github.com/jostinalvarado/copa-tracker-wc2026/actions/workflows/ci.yml)
+[![CI](https://github.com/jostinalvarado/album-tracker-wc2026/actions/workflows/ci.yml/badge.svg)](https://github.com/jostinalvarado/album-tracker-wc2026/actions/workflows/ci.yml)
+[![Coverage](https://img.shields.io/badge/coverage-88%25-success.svg)](#cobertura-de-tests)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](CHANGELOG.md)
 [![Angular 18](https://img.shields.io/badge/angular-18-dd0031.svg)](https://angular.dev)
 [![Firebase](https://img.shields.io/badge/firebase-Firestore%20%2B%20Auth-ffa000.svg)](https://firebase.google.com)
+[![Code style: Conventional Commits](https://img.shields.io/badge/commits-conventional-fe5196.svg)](https://www.conventionalcommits.org)
 
 Aplicación web para llevar la cuenta de los cromos del álbum del Mundial 2026.
 Marca lo que ya tienes pegado, registra repetidos para intercambio y consulta
@@ -368,9 +371,15 @@ Las decisiones técnicas relevantes están documentadas en formato
 
 ## Contribuir
 
-PRs bienvenidos. Lee [CONTRIBUTING.md](CONTRIBUTING.md) antes de empezar.
+PRs bienvenidos. Antes de abrir uno, leé:
 
-Reportes de seguridad: ver [SECURITY.md](SECURITY.md).
+- [CONTRIBUTING.md](CONTRIBUTING.md) — flujo, estilo, convenciones de commits.
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) — Contributor Covenant 2.1.
+- [SECURITY.md](SECURITY.md) — cómo reportar vulnerabilidades (en privado).
+- [CHANGELOG.md](CHANGELOG.md) — historial de versiones.
+
+Cada PR pasa por CI (`lint + test + build`) y se valida contra los
+thresholds de cobertura definidos en `jest.config.js`.
 
 ## Personalización
 

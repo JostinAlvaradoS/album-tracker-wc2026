@@ -20,6 +20,11 @@ angular/dist/
 angular/.angular/
 angular/tmp/
 
+# Tests
+angular/coverage/
+angular/out-tsc/
+.jest-cache/
+
 # Environment generado desde .env (no versionar, se regenera)
 angular/src/environments/environment.ts
 
