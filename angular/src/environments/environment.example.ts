@@ -11,4 +11,8 @@ export const environment = {
     messagingSenderId: '',
     appId: '',
   },
+  /** Id del documento en albums/{albumId}. Default: 'wc2026'. */
+  albumId: 'wc2026',
+  /** Whitelist de correos autorizados. Vacio = modo abierto. */
+  allowedEmails: [] as string[],
 };

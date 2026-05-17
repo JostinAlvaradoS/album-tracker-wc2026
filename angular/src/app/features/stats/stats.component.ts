@@ -8,8 +8,7 @@ import { NgIf, NgFor } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AlbumViewService } from '../../core/services/album-view.service';
 import { AlbumProgress, SectionProgress } from '../../core/models/album.model';
-
-const ALBUM_ID = 'wc2026';
+import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
 
 @Component({
   selector: 'app-stats',
@@ -92,7 +91,7 @@ const ALBUM_ID = 'wc2026';
 
       <!-- ====== NOTA ====== -->
       <p class="note">
-        Tenés <strong class="note__big">{{ p.totalStickersOwned }}</strong>
+        Tienes <strong class="note__big">{{ p.totalStickersOwned }}</strong>
         cromos en total <span class="note__split">·</span>
         <span class="e26-code">{{ p.owned }}</span> distintos
         <span class="note__plus">+</span>
@@ -451,11 +450,12 @@ const ALBUM_ID = 'wc2026';
 })
 export class StatsComponent {
   private viewService = inject(AlbumViewService);
+  private albumId = inject(CURRENT_ALBUM_ID);
 
   readonly circumference = 2 * Math.PI * 60;
 
   progress = toSignal<AlbumProgress | null>(
-    this.viewService.getProgress(ALBUM_ID),
+    this.viewService.getProgress(this.albumId),
     { initialValue: null }
   );
 

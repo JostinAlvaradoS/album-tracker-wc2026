@@ -11,6 +11,7 @@ import {
 import { getAuth, provideAuth } from '@angular/fire/auth';
 import { routes } from './app.routes';
 import { environment } from '../environments/environment';
+import { ALLOWED_EMAILS, CURRENT_ALBUM_ID } from './core/config/app.tokens';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -31,5 +32,10 @@ export const appConfig: ApplicationConfig = {
       })
     ),
     provideAuth(() => getAuth()),
+    { provide: CURRENT_ALBUM_ID, useValue: environment.albumId },
+    {
+      provide: ALLOWED_EMAILS,
+      useValue: environment.allowedEmails.map((e) => e.toLowerCase()),
+    },
   ],
 };

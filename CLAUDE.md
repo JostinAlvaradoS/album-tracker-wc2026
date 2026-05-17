@@ -8,20 +8,33 @@ Working directory de Angular: `angular/`.
 
 ```
 angular/src/app/
-  app.config.ts                          provideFirebaseApp + provideFirestore (con cache persistente)
+  app.config.ts                          provideFirebaseApp + provideFirestore + InjectionTokens (CURRENT_ALBUM_ID, ALLOWED_EMAILS)
   app.routes.ts                          rutas standalone
   core/
+    config/app.tokens.ts                 CURRENT_ALBUM_ID, ALLOWED_EMAILS (vienen de environment)
     models/album.model.ts                Album, Section, Sticker, CollectionItem, etc.
     services/
-      auth.service.ts                    Firebase Auth
-      album-catalog.service.ts           Lee catálogo (estático) de Firestore, cache vía shareReplay
+      auth.service.ts                    Firebase Auth + whitelist (UnauthorizedEmailError) + reset de caches en logout
+      album-catalog.service.ts           Lee catálogo (estático) de Firestore, cache vía shareReplay + reset() para limpiar listeners
       collection.service.ts              Inventario del usuario (writes + listeners)
       album-view.service.ts              Combina catálogo + inventario → vistas listas para UI
+    guards/auth.guard.ts                 authGuard
   features/
-    album-view/                          Pantalla principal del álbum
+    login/                               Login solo con Google + chequeo post-login contra ALLOWED_EMAILS
+    album-view/                          Grid principal
+      sticker-cell/                      Sub-componente presentacional de la celda (extraído del grid)
     duplicates/                          Lista de repetidas
-    ...
+    missing-list/                        Lista de faltas
+    comparator/                          Consulta rápida del estado de un cromo (intercambios)
+    stats/                               Progreso global y por sección
 ```
+
+## Configuración OSS
+
+- `environment.albumId` se inyecta vía `CURRENT_ALBUM_ID`. Default `'wc2026'`.
+- `environment.allowedEmails` se inyecta vía `ALLOWED_EMAILS`. Vacío = modo abierto.
+- Ambas se popular desde `angular/.env` (`NG_APP_ALBUM_ID`, `NG_APP_ALLOWED_EMAILS`) vía `scripts/set-env.js`.
+- La whitelist en cliente es UX. La autoridad real es `firestore.rules` (mantener manual sync).
 
 ## Modelo de datos en Firestore
 
