@@ -21,6 +21,19 @@ jobs:
       run:
         working-directory: angular
 
+    # Variables del Firebase Web SDK con valores fixture para CI.
+    # Esto es público: el SDK web de Firebase no protege secrets, la
+    # seguridad real la imponen firestore.rules + dominio autorizado.
+    # CI solo valida que la app compila y los tests pasan; no deploya.
+    # Los `pretest` / `prebuild` corren `set-env.js` que las necesita.
+    env:
+      NG_APP_FIREBASE_API_KEY: ci-fixture
+      NG_APP_FIREBASE_AUTH_DOMAIN: ci.firebaseapp.com
+      NG_APP_FIREBASE_PROJECT_ID: ci-project
+      NG_APP_FIREBASE_STORAGE_BUCKET: ci.appspot.com
+      NG_APP_FIREBASE_MESSAGING_SENDER_ID: '0'
+      NG_APP_FIREBASE_APP_ID: '0:0:web:0'
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -43,18 +56,6 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-
-      # Genera environment.ts con valores demo. Los secrets reales NO se
-      # exponen en CI: la build verifica que compila, no que deploya.
-      - name: Generate environment.ts (CI fixture)
-        run: pnpm run set-env
-        env:
-          NG_APP_FIREBASE_API_KEY: ci-fixture
-          NG_APP_FIREBASE_AUTH_DOMAIN: ci.firebaseapp.com
-          NG_APP_FIREBASE_PROJECT_ID: ci-project
-          NG_APP_FIREBASE_STORAGE_BUCKET: ci.appspot.com
-          NG_APP_FIREBASE_MESSAGING_SENDER_ID: '0'
-          NG_APP_FIREBASE_APP_ID: '0:0:web:0'
 
       - name: Lint
         run: pnpm run lint
