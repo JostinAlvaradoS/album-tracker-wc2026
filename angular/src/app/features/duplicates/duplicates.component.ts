@@ -431,6 +431,12 @@ export class DuplicatesComponent {
     this.duplicates().reduce((sum, s) => sum + (s.count - 1), 0)
   );
 
+  /** Texto del botón de copiar: cambia según haya filtro activo y estado. */
+  copyButtonLabel = computed(() => {
+    if (this.copyState() === 'copied') return 'Copiado ✓';
+    return this.sectionFilter() ? 'Copiar sección' : 'Copiar lista completa';
+  });
+
   async inc(s: StickerView) {
     if (this.busy()) return;
     this.busy.set(true);

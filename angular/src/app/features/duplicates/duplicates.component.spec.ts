@@ -209,6 +209,26 @@ describe('DuplicatesComponent', () => {
     });
   });
 
+  describe('copyButtonLabel', () => {
+    it('sin filtro y estado idle dice "Copiar lista completa"', () => {
+      const fixture = setup(of([]));
+      expect(fixture.componentInstance.copyButtonLabel()).toBe('Copiar lista completa');
+    });
+
+    it('con filtro activo dice "Copiar sección"', () => {
+      const fixture = setup(of([]));
+      fixture.componentInstance.sectionFilter.set('arg');
+      expect(fixture.componentInstance.copyButtonLabel()).toBe('Copiar sección');
+    });
+
+    it('después de copiar dice "Copiado ✓"', () => {
+      const fixture = setup(of([]));
+      const c = fixture.componentInstance;
+      c.copyState.set('copied');
+      expect(c.copyButtonLabel()).toBe('Copiado ✓');
+    });
+  });
+
   describe('track', () => {
     it('usa code como identidad', () => {
       const fixture = setup(of([]));
