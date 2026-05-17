@@ -64,4 +64,15 @@ export class AlbumCatalogService {
     }
     return this.stickersCache.get(albumId)!;
   }
+
+  /**
+   * Invalida los caches de listeners. Pensado para llamarse al hacer
+   * logout — los observables con `refCount: false` viven para siempre y
+   * emitirían `permission-denied` con un UID que ya no existe.
+   */
+  reset(): void {
+    this.albumCache.clear();
+    this.sectionsCache.clear();
+    this.stickersCache.clear();
+  }
 }

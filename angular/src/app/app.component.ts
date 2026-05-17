@@ -23,14 +23,15 @@ interface NavRoute {
   path: string;
   label: string;
   title: string;
-  icon: 'grid' | 'list' | 'swap' | 'chart';
+  icon: 'grid' | 'list' | 'swap' | 'chart' | 'search';
 }
 
 const NAV_ROUTES: NavRoute[] = [
-  { id: 'home',   path: '/home',   label: 'Home',   title: 'Home',         icon: 'chart' },
-  { id: 'album',  path: '/album',  label: 'Álbum',  title: 'Mi álbum',     icon: 'grid'  },
-  { id: 'faltas', path: '/faltas', label: 'Faltas', title: 'Me faltan',    icon: 'list'  },
-  { id: 'repes',  path: '/repes',  label: 'Repes',  title: 'Mis repes',    icon: 'swap'  },
+  { id: 'home',       path: '/home',       label: 'Home',     title: 'Home',         icon: 'chart'  },
+  { id: 'album',      path: '/album',      label: 'Álbum',    title: 'Mi álbum',     icon: 'grid'   },
+  { id: 'faltas',     path: '/faltas',     label: 'Faltas',   title: 'Me faltan',    icon: 'list'   },
+  { id: 'repes',      path: '/repes',      label: 'Repes',    title: 'Mis repes',    icon: 'swap'   },
+  { id: 'comparador', path: '/comparador', label: 'Buscar',   title: 'Comparador',   icon: 'search' },
 ];
 
 @Component({
@@ -51,7 +52,7 @@ const NAV_ROUTES: NavRoute[] = [
                 <span class="brand__mark-num e26-display">26</span>
               </span>
               <span class="brand__copy">
-                <span class="e26-eyebrow brand__eyebrow">Línea 26</span>
+                <span class="e26-eyebrow brand__eyebrow">FWC 2026</span>
                 <span class="brand__title e26-display">{{ pageTitle() }}</span>
               </span>
             </a>
@@ -140,6 +141,12 @@ const NAV_ROUTES: NavRoute[] = [
                   <path d="M7 16V11"/>
                   <path d="M12 16V7"/>
                   <path d="M17 16v-3"/>
+                </svg>
+                <svg *ngSwitchCase="'search'" viewBox="0 0 24 24" width="22" height="22"
+                     fill="none" stroke="currentColor" stroke-width="1.6"
+                     stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="11" cy="11" r="7"/>
+                  <path d="m20 20-4-4"/>
                 </svg>
               </ng-container>
             </span>
@@ -458,7 +465,7 @@ export class AppComponent {
   constructor() {
     effect(() => {
       document.documentElement.setAttribute('data-theme', this.theme());
-      try { localStorage.setItem('e26-theme', this.theme()); } catch {}
+      try { localStorage.setItem('e26-theme', this.theme()); } catch { /* localStorage off / quota */ }
     });
   }
 
@@ -466,8 +473,9 @@ export class AppComponent {
     this.theme.set(this.theme() === 'light' ? 'dark' : 'light');
   }
 
-  logout() {
-    this.auth.logout();
+  async logout() {
+    await this.auth.logout();
+    this.router.navigate(['/login']);
   }
 
   userLabel(u: { isAnonymous: boolean; displayName?: string | null; email?: string | null }): string {
@@ -481,7 +489,7 @@ export class AppComponent {
     try {
       const stored = localStorage.getItem('e26-theme');
       if (stored === 'dark' || stored === 'light') return stored;
-    } catch {}
+    } catch { /* localStorage off */ }
     return 'light';
   }
 }

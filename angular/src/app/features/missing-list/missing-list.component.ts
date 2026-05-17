@@ -1,6 +1,7 @@
 import {
   Component,
   computed,
+  DestroyRef,
   inject,
   signal,
   ChangeDetectionStrategy,
@@ -9,8 +10,7 @@ import { NgIf, NgFor } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AlbumViewService } from '../../core/services/album-view.service';
 import { StickerView } from '../../core/models/album.model';
-
-const ALBUM_ID = 'wc2026';
+import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
 
 interface MissingGroup {
   section: string;
@@ -35,7 +35,7 @@ interface MissingGroup {
             <span class="hero__suffix">cromos pendientes</span>
           </h1>
           <p class="hero__text">
-            Compartí esta lista con quien intercambies.
+            Comparte esta lista con quien intercambies.
             Cada código corresponde a un slot del álbum.
           </p>
         </div>
@@ -255,8 +255,9 @@ interface MissingGroup {
 })
 export class MissingListComponent {
   private viewService = inject(AlbumViewService);
+  private albumId = inject(CURRENT_ALBUM_ID);
 
-  missing = toSignal(this.viewService.getMissing(ALBUM_ID), {
+  missing = toSignal(this.viewService.getMissing(this.albumId), {
     initialValue: [] as StickerView[],
   });
 
@@ -279,13 +280,25 @@ export class MissingListComponent {
     });
   });
 
+  private copyResetTimer: ReturnType<typeof setTimeout> | null = null;
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => {
+      if (this.copyResetTimer !== null) clearTimeout(this.copyResetTimer);
+    });
+  }
+
   copyList() {
     const text = this.grouped()
       .map(g => `${g.section}: ${g.codes}`)
       .join('\n');
     navigator.clipboard.writeText(text).then(() => {
       this.copyState.set('copied');
-      setTimeout(() => this.copyState.set('idle'), 1800);
+      if (this.copyResetTimer !== null) clearTimeout(this.copyResetTimer);
+      this.copyResetTimer = setTimeout(() => {
+        this.copyState.set('idle');
+        this.copyResetTimer = null;
+      }, 1800);
     });
   }
 
