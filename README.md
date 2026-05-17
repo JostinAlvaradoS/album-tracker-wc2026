@@ -1,6 +1,6 @@
 # Copa Tracker — Álbum WC 2026
 
-[![CI](https://github.com/jostinalvarado/album-tracker-wc2026/actions/workflows/ci.yml/badge.svg)](https://github.com/jostinalvarado/album-tracker-wc2026/actions/workflows/ci.yml)
+[![CI](https://github.com/JostinAlvaradoS/album-tracker-wc2026/actions/workflows/ci.yml/badge.svg)](https://github.com/JostinAlvaradoS/album-tracker-wc2026/actions/workflows/ci.yml)
 [![Coverage](https://img.shields.io/badge/coverage-88%25-success.svg)](#cobertura-de-tests)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](CHANGELOG.md)

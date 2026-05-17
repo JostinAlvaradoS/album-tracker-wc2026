@@ -57,4 +57,4 @@ Primera release pública del tracker.
 - Catálogo (`scripts/catalog.json`) versionado para setup en 2 pasos.
 - Variables configurables vía `.env` (Firebase + albumId + whitelist).
 
-[1.0.0]: https://github.com/jostinalvarado/album-tracker-wc2026/releases/tag/v1.0.0
+[1.0.0]: https://github.com/JostinAlvaradoS/album-tracker-wc2026/releases/tag/v1.0.0
