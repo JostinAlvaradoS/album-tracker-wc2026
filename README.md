@@ -98,17 +98,97 @@ node import-to-firestore.js       # sube los 994 cromos
 > (es la fuente de verdad de la estructura) y corre `node generate-catalog.js`
 > para regenerar `catalog.json` antes del import.
 
-### 5. Reglas de Firestore
+### 5. Configurar la whitelist de acceso
 
-El archivo `firestore.rules` ya implementa el modelo:
+> **Importante:** la whitelist vive en **dos archivos que tienes que mantener
+> idénticos a mano**. Es la parte más manual del setup y suele confundir.
+> Lee con calma este apartado antes de deployar.
 
-- Catálogo (`albums/*`) — lectura para usuarios autorizados, escritura bloqueada.
-- Inventario (`users/{uid}/...`) — solo el dueño autorizado.
+#### Por qué hay dos lugares
 
-Si configuraste `NG_APP_ALLOWED_EMAILS`, **edita también `firestore.rules`**
-para que la función `isAllowlisted()` contenga la misma lista, o las reglas
-rechazarán las operaciones. Si la dejas vacía, comenta o ajusta la función
-para que solo valide `request.auth != null`.
+La whitelist se valida en dos capas independientes:
+
+| Capa | Archivo | Rol |
+|---|---|---|
+| **Cliente** (UX) | `angular/.env` → `NG_APP_ALLOWED_EMAILS` | Cuando alguien hace login, el cliente verifica el email **antes** de tocar Firestore. Si no coincide, hace `signOut` y muestra el mensaje "La cuenta X no está autorizada". Sin esto, el usuario logra autenticarse y ve la UI cargando sin contenido (Firestore le responde `permission-denied` en silencio). |
+| **Servidor** (autoridad real) | `firestore.rules` → función `isAllowlisted()` | Es la **única autoridad de seguridad**. Corre en infraestructura de Google y bloquea cualquier lectura/escritura que no pase. Aunque alguien modifique el JS del cliente con DevTools, las reglas no se pueden bypasear. |
+
+Firebase no tiene forma nativa de leer variables de entorno desde
+`firestore.rules`, ni de importar archivos TypeScript. Por eso la lista
+hay que escribirla **manualmente en los dos archivos**.
+
+#### Los dos modos de operación
+
+**Modo A — Whitelist activa (recomendado para uso personal/familiar)**
+
+`angular/.env`:
+```
+NG_APP_ALLOWED_EMAILS=tu@gmail.com,amigo1@gmail.com
+```
+
+`firestore.rules` (función `isAllowlisted`):
+```
+function isAllowlisted() {
+  return request.auth != null
+    && request.auth.token.email_verified == true
+    && request.auth.token.email in [
+      'tu@gmail.com',
+      'amigo1@gmail.com'
+    ];
+}
+```
+
+Solo esas cuentas pueden entrar y operar.
+
+**Modo B — Abierto (cualquier cuenta de Google entra)**
+
+Útil para demos públicas, hackatones o forks donde quieres que cualquiera
+pruebe la app y juegue con su propia colección aislada.
+
+`angular/.env`:
+```
+NG_APP_ALLOWED_EMAILS=
+```
+(vacío, o directamente no agregues la línea)
+
+`firestore.rules` (función `isAllowlisted`):
+```
+function isAllowlisted() {
+  return request.auth != null
+    && request.auth.token.email_verified == true;
+}
+```
+
+Cualquier Google account entra. Las otras reglas siguen aislando los
+datos por `uid` — cada usuario solo ve su propia colección.
+
+#### Qué pasa si los dos archivos no coinciden
+
+| Cliente (`.env`) | Servidor (`rules`) | Resultado |
+|---|---|---|
+| Sin lista (vacío) | Sin lista (modo abierto) | ✅ Funciona. Modo abierto coherente. |
+| Lista con tu email | Misma lista | ✅ Funciona. Modo restringido coherente. |
+| Lista con tu email | Sin lista | ⚠️ El cliente bloquea emails ajenos, pero alguien con DevTools puede bypasearlo. **No es seguro.** |
+| Sin lista | Lista con tu email | ❌ UX rota. Cualquiera puede iniciar sesión desde el cliente, pero al intentar leer/escribir Firestore recibe `permission-denied` sin contexto. |
+
+**Regla práctica:** después de cambiar la whitelist, deploya las reglas:
+
+```bash
+firebase deploy --only firestore:rules
+```
+
+Sin este deploy, el cambio queda solo en tu máquina y no protege nada.
+
+#### Sobre versionar tu email en `firestore.rules`
+
+Por ahora el email del operador queda escrito en `firestore.rules`
+(que sí está versionado en el repo). Un email no es un secret, pero
+si te incomoda exponerlo en un repo público, la alternativa es mover
+la whitelist a una colección Firestore (`allowlist/{email}` gestionada
+desde Firebase Console). Lo discutimos en
+[ADR-0003](docs/adr/0003-whitelist-dual-client-rules.md) como
+"opción D"; sigue siendo una migración válida cuando el operador
+quiera o cuando la lista crezca a más de unas pocas personas.
 
 ### 6. Ejecutar en local
 
@@ -186,7 +266,7 @@ documentos vacíos al iniciar un álbum.
 ## Arquitectura
 
 > Los diagramas usan [Mermaid](https://mermaid.js.org/), que GitHub
-> renderiza de forma nativa. Si los ves como bloques de código, abrí
+> renderiza de forma nativa. Si los ves como bloques de código, abre
 > el README desde GitHub web (no desde un editor local sin plugin).
 
 ### 1. Vista de sistema
@@ -371,7 +451,7 @@ Las decisiones técnicas relevantes están documentadas en formato
 
 ## Contribuir
 
-PRs bienvenidos. Antes de abrir uno, leé:
+PRs bienvenidos. Antes de abrir uno, lee:
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) — flujo, estilo, convenciones de commits.
 - [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) — Contributor Covenant 2.1.
