@@ -5,6 +5,52 @@ Todos los cambios relevantes del proyecto se documentan acá.
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es/1.1.0/)
 y el proyecto adhiere a [Semantic Versioning](https://semver.org/lang/es/).
 
+## [1.1.0] — 2026-05-17
+
+Filtro de secciones compartido en todas las pantallas con listas, mejoras
+de UX en repes y refactor interno hacia componentes reutilizables.
+
+### Features
+
+- **Filtro de secciones en faltas y repes.** Antes solo el álbum tenía
+  selector + chips de equipos. Ahora también `faltas` y `repes` permiten
+  filtrar por sección de un toque.
+- **Secciones especiales en los chips.** Los chips ya no muestran solo
+  los 48 equipos: ahora aparecen también FWC intro, Champions y
+  Coca-Cola con un estilo punteado para distinguirlos. La etiqueta del
+  carrusel pasa de "Equipos" a "Secciones".
+- **Copia de lista respeta el filtro activo.** Si filtras por una
+  sección, el botón "Copiar lista completa" cambia a "Copiar sección" y
+  copia solo lo visible. Se acabaron los exportes accidentales de todo
+  el álbum.
+- **Desglose claro en repes.** Cada fila ahora muestra dos chips
+  explícitos: "1 pegado" (verde) + "N para cambio" (ámbar). Antes solo
+  había un número total que confundía sobre cuál era el del álbum y
+  cuáles los repes.
+
+### Mejoras
+
+- **`SectionFilterComponent` reutilizable** con 3 modos
+  (`progress` / `missing-count` / `dupe-count`) en
+  `features/shared/section-filter/`. Antes el selector vivía solo
+  inline en `album-view`.
+- **Alineación de controles `+/−` en repes** al borde derecho de la
+  columna en desktop.
+- **Empty states contextuales** en faltas y repes: si la lista está
+  vacía por un filtro activo, el mensaje lo aclara y sugiere quitar el
+  filtro.
+- **Captures organizadas** en el README con tablas HTML para mostrar
+  pantallas en grilla y los tres estados de un cromo en fila comparativa.
+
+### Calidad
+
+- **145 tests** (+29 desde v1.0.0) con `94%` de cobertura.
+- Nuevos specs para `SectionFilterComponent` (chipsSections,
+  chipLabel, modos, eventos) y para el flujo de filtro+copyList en
+  faltas y repes.
+
+[1.1.0]: https://github.com/JostinAlvaradoS/album-tracker-wc2026/releases/tag/v1.1.0
+
 ## [1.0.0] — 2026-05-16
 
 Primera release pública del tracker.
