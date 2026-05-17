@@ -1,0 +1,57 @@
+name: ✨ Propuesta de feature
+description: Ideá una mejora o funcionalidad nueva
+title: '[feature]: '
+labels: ['enhancement']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Las propuestas de features se discuten primero en un issue antes
+        de codear. Esto evita esfuerzo duplicado y desacuerdos en PR.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problema que resuelve
+      description: ¿Qué dolor concreto tiene el usuario hoy?
+      placeholder: Cuando intercambio cromos en persona, necesito saber si...
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solución propuesta
+      description: Cómo te imaginás el feature funcionando.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativas consideradas
+      description: ¿Qué otras formas pensaste de resolverlo y por qué no?
+    validations:
+      required: false
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Alcance estimado
+      options:
+        - Pequeño (un archivo, <2h)
+        - Mediano (varios archivos, ~1 día)
+        - Grande (cambio arquitectónico, varios días)
+        - No lo sé
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: ¿Te ofrecés a implementarlo?
+      options:
+        - label: Quiero implementarlo yo mismo en un PR.
+          required: false
+        - label: Solo lo estoy proponiendo, no voy a implementarlo.
+          required: false

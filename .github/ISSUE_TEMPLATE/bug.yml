@@ -1,0 +1,77 @@
+name: 🐛 Reporte de bug
+description: Algo no anda como esperabas
+title: '[bug]: '
+labels: ['bug']
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Gracias por tomarte el tiempo de reportar. Cuanta más info, más rápido se arregla.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Qué pasó
+      description: Descripción clara del bug.
+      placeholder: Al hacer X, esperaba Y, pero pasó Z.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Cómo reproducirlo
+      description: Pasos para reproducir el bug.
+      placeholder: |
+        1. Abrir la app
+        2. Ir a /album
+        3. Click derecho en un cromo pegado
+        4. Ver el error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Comportamiento esperado
+      description: Qué debería haber pasado.
+    validations:
+      required: false
+
+  - type: input
+    id: browser
+    attributes:
+      label: Navegador y versión
+      placeholder: Chrome 121, Safari 17, Firefox 124…
+    validations:
+      required: true
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: Tipo de dispositivo
+      options:
+        - Desktop
+        - Mobile
+        - Tablet
+    validations:
+      required: true
+
+  - type: textarea
+    id: console
+    attributes:
+      label: Logs / errores de consola
+      description: Si hay errores en DevTools → Console, copialos acá.
+      render: shell
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Chequeos previos
+      options:
+        - label: Busqué en issues abiertos y cerrados antes de reportar.
+          required: true
+        - label: Estoy usando la última versión publicada.
+          required: false
