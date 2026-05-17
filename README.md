@@ -53,8 +53,8 @@ estados de cromos en segundos durante un cambio.
 
 <table>
 <tr>
-<td width="33%" align="center"><img src="https://github.com/user-attachments/assets/c8b0bb6a-5757-43d8-8322-866f31f45618" alt="Cromo pegado" width="100%" /><br/><sub><b>Pegado</b> · ya lo tienes en el álbum</sub></td>
-<td width="33%" align="center"><img src="https://github.com/user-attachments/assets/cce12de7-bd95-41d8-8e22-64bb80383cd2" alt="Cromo faltante" width="100%" /><br/><sub><b>Falta</b> · aún no aparece</sub></td>
+<td width="33%" align="center"><img src="https://github.com/user-attachments/assets/cce12de7-bd95-41d8-8e22-64bb80383cd2" alt="Cromo pegado" width="100%" /><br/><sub><b>Pegado</b> · ya lo tienes en el álbum</sub></td>
+<td width="33%" align="center"> <img src="https://github.com/user-attachments/assets/c8b0bb6a-5757-43d8-8322-866f31f45618"alt="Cromo faltante" width="100%" /><br/><sub><b>Falta</b> · aún no aparece</sub></td>
 <td width="33%" align="center"><img src="https://github.com/user-attachments/assets/0a4bc0d4-845e-48cc-a02e-7f2c1631b260" alt="Cromo repetido" width="100%" /><br/><sub><b>Repe</b> · disponible para cambio</sub></td>
 </tr>
 </table>
