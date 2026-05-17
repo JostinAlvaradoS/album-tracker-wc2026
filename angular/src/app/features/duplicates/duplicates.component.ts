@@ -10,14 +10,15 @@ import { NgIf, NgFor } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AlbumViewService } from '../../core/services/album-view.service';
 import { CollectionService } from '../../core/services/collection.service';
-import { StickerView } from '../../core/models/album.model';
+import { SectionView, StickerView } from '../../core/models/album.model';
 import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
+import { SectionFilterComponent } from '../shared/section-filter/section-filter.component';
 
 @Component({
   selector: 'app-duplicates',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [NgIf, NgFor],
+  imports: [NgIf, NgFor, SectionFilterComponent],
   template: `
     <div class="page">
 
@@ -26,33 +27,43 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
         <div class="hero__main">
           <span class="e26-eyebrow">Para intercambio</span>
           <h1 class="hero__title e26-display">
-            <span class="hero__num">{{ totalDups() }}</span>
-            <span class="hero__suffix">repe{{ totalDups() === 1 ? '' : 's' }}</span>
+            <span class="hero__num">{{ visibleDupsTotal() }}</span>
+            <span class="hero__suffix">repe{{ visibleDupsTotal() === 1 ? '' : 's' }}</span>
           </h1>
           <p class="hero__text">
-            <span class="hero__count">{{ duplicates().length }}</span>
-            cromos distintos repetidos. Comparte la lista o ajusta las
-            cantidades con
+            <span class="hero__count">{{ visibleDuplicates().length }}</span>
+            cromos distintos repetidos. Ajusta cantidades con
             <span class="e26-code">+</span> / <span class="e26-code">−</span>.
+            <span *ngIf="sectionFilter()" class="hero__filter-note">
+              · Filtro activo, copia solo lo visible.
+            </span>
           </p>
         </div>
 
         <button class="copy-btn"
                 type="button"
                 (click)="copyList()"
-                [disabled]="duplicates().length === 0">
+                [disabled]="visibleDuplicates().length === 0">
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none"
                stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"
                aria-hidden="true">
             <rect x="9" y="9" width="13" height="13" rx="2"></rect>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
           </svg>
-          <span>{{ copyState() === 'idle' ? 'Copiar lista' : 'Copiado ✓' }}</span>
+          <span>{{ copyButtonLabel() }}</span>
         </button>
       </section>
 
+      <!-- Filtro compartido -->
+      <app-section-filter
+        *ngIf="sectionsWithDupes().length > 0"
+        [sections]="sectionsWithDupes()"
+        [selected]="sectionFilter()"
+        mode="dupe-count"
+        (selectedChange)="sectionFilter.set($event)" />
+
       <!-- Tabla -->
-      <section class="list" *ngIf="duplicates().length > 0; else emptyTpl">
+      <section class="list" *ngIf="visibleDuplicates().length > 0; else emptyTpl">
         <header class="list__head">
           <span class="col col--code">Código</span>
           <span class="col col--name">Cromo</span>
@@ -60,7 +71,7 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
         </header>
 
         <article class="row"
-                 *ngFor="let s of duplicates(); trackBy: track">
+                 *ngFor="let s of visibleDuplicates(); trackBy: track">
           <span class="col col--code e26-code">{{ s.code }}</span>
 
           <span class="col col--name">
@@ -105,10 +116,13 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
       <ng-template #emptyTpl>
         <div class="empty">
           <span class="empty__num e26-display">0</span>
-          <p class="empty__title e26-display">Sin repes</p>
+          <p class="empty__title e26-display">
+            {{ sectionFilter() ? 'Sin repes aquí' : 'Sin repes' }}
+          </p>
           <p class="empty__text">
-            No tienes cromos repetidos. Cuando te toque uno duplicado,
-            aparecerá aquí listo para intercambiar.
+            {{ sectionFilter()
+              ? 'Esta sección no tiene repes en este momento. Quita el filtro para ver el resto.'
+              : 'No tienes cromos repetidos. Cuando te toque uno duplicado, aparecerá aquí listo para intercambiar.' }}
           </p>
         </div>
       </ng-template>
@@ -184,6 +198,7 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
       max-width: 52ch;
     }
     .hero__count { color: var(--e26-text); font-weight: 700; }
+    .hero__filter-note { color: var(--e26-info); font-weight: 600; }
     .hero__text .e26-code {
       background: var(--e26-surface-2);
       padding: 1px 5px;
@@ -318,6 +333,7 @@ import { CURRENT_ALBUM_ID } from '../../core/config/app.tokens';
       background: var(--e26-surface-2);
       border-radius: var(--e26-radius-pill);
       padding: 3px;
+      justify-self: end;
     }
     .step {
       width: 30px;
@@ -376,13 +392,41 @@ export class DuplicatesComponent {
   private collectionService = inject(CollectionService);
   private albumId = inject(CURRENT_ALBUM_ID);
 
-  duplicates = toSignal(this.viewService.getDuplicates(this.albumId), {
-    initialValue: [] as StickerView[],
+  sections = toSignal(this.viewService.getAlbumView(this.albumId), {
+    initialValue: [] as SectionView[],
   });
 
+  sectionFilter = signal<string>('');
   copyState = signal<'idle' | 'copied'>('idle');
   busy = signal(false);
 
+  /** Todos los cromos con repes, sin filtro. */
+  duplicates = computed<StickerView[]>(() =>
+    this.sections().flatMap((s) =>
+      s.stickers.filter((x) => x.status === 'duplicate')
+    )
+  );
+
+  /** Secciones que tienen al menos un cromo con repes — para el filtro. */
+  sectionsWithDupes = computed(() =>
+    this.sections().filter((s) =>
+      s.stickers.some((x) => x.status === 'duplicate')
+    )
+  );
+
+  /** Lista visible según el filtro de sección. */
+  visibleDuplicates = computed<StickerView[]>(() => {
+    const filter = this.sectionFilter();
+    if (!filter) return this.duplicates();
+    return this.duplicates().filter((s) => s.sectionId === filter);
+  });
+
+  /** Total de repes (count-1) sumados en lo visible. */
+  visibleDupsTotal = computed(() =>
+    this.visibleDuplicates().reduce((sum, s) => sum + (s.count - 1), 0)
+  );
+
+  /** Total global de repes (sin filtro). Útil para tests / contadores. */
   totalDups = computed(() =>
     this.duplicates().reduce((sum, s) => sum + (s.count - 1), 0)
   );
@@ -420,8 +464,8 @@ export class DuplicatesComponent {
   }
 
   copyList() {
-    const text = this.duplicates()
-      .map(s => `${s.code} ×${s.count - 1}`)
+    const text = this.visibleDuplicates()
+      .map((s) => `${s.code} ×${s.count - 1}`)
       .join(', ');
     navigator.clipboard.writeText(text).then(() => {
       this.copyState.set('copied');
